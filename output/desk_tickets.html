@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campus Customs · Desk Tickets</title>
+<style>
+/* Campus Customs design system (from HW 4): navy identity, warm paper ground, amber accent. */
+:root {
+  --navy: #00356b; --navy-deep: #002247; --navy-ink: #0a1b32;
+  --paper: #f4f3f1; --paper-2: #ebeae7; --card: #ffffff; --tile: #f7f6f4;
+  --ink: #0f1d30; --ink-soft: #3b4b60; --muted: #6d7b8d; --on-dark: #e8edf4; --on-dark-soft: #9fb2c9;
+  --line: #e3e1dc; --line-strong: #cfccc5; --tint: #eaf0f7;
+  --gold: #e8a33d; --gold-deep: #d08f2a; --ok: #2f6b45; --warn: #8a5a1f; --bad: #8c3a3a; --wine: #7d3330;
+  --off: #c9c6bf; --off-bg: #f2f1ee;
+
+  /* One color per agent, used everywhere that agent appears. */
+  --human: #d08f2a; --boss: #00356b; --inventory: #c4831f; --accounting: #2f6b45; --facilities: #8a5a1f; --customer_service: #7d3330;
+
+  --serif: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --r: 8px; --r-lg: 12px;
+  --shadow-1: 0 1px 2px rgba(10,27,50,.05); --shadow-2: 0 2px 10px rgba(10,27,50,.07);
+  --ease: cubic-bezier(.22,.61,.36,1);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 14px/1.5 var(--sans); }
+code, .mono { font-family: var(--mono); font-size: .92em; }
+
+/* ------------------------------------------------------------ header */
+.top { background: var(--navy-ink); color: var(--on-dark); }
+.top-inner { max-width: 1440px; margin: 0 auto; padding: 18px 32px 0; }
+.brand { display: flex; align-items: center; gap: 14px; }
+.logo { width: 40px; height: 40px; border-radius: 9px; background: var(--navy); display: grid; place-items: center;
+        border: 1px solid rgba(255,255,255,.14); }
+.logo svg { width: 22px; height: 22px; stroke: #fff; }
+.brand h1 { margin: 0; font: 600 21px/1.2 var(--serif); letter-spacing: .2px; }
+.brand p { margin: 2px 0 0; color: var(--on-dark-soft); font-size: 12.5px; }
+.brand .meta { margin-left: auto; display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 12px;
+        border: 1px solid rgba(255,255,255,.16); color: var(--on-dark); white-space: nowrap; }
+.pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); }
+.tabs { display: flex; gap: 4px; margin-top: 18px; overflow-x: auto; }
+.tab { appearance: none; border: 0; background: transparent; color: var(--on-dark-soft); padding: 11px 18px 12px;
+       font: 500 13.5px var(--sans); cursor: pointer; border-radius: 8px 8px 0 0; display: flex; align-items: center; gap: 8px;
+       transition: background .18s var(--ease), color .18s var(--ease); white-space: nowrap; }
+.tab:hover { color: #fff; background: rgba(255,255,255,.06); }
+.tab[aria-selected="true"] { background: var(--paper); color: var(--navy); font-weight: 600; }
+.tab .tag { font-size: 10.5px; padding: 1px 6px; border-radius: 4px; background: rgba(232,163,61,.18); color: var(--gold); }
+.tab[aria-selected="true"] .tag { background: #fbecd3; color: var(--warn); }
+
+main { max-width: 1440px; margin: 0 auto; padding: 24px 32px 48px; }
+.view { display: none; } .view.active { display: block; animation: fade .35s var(--ease); }
+@keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* ------------------------------------------------ connected banner */
+.connected { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; margin-bottom: 18px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-1); }
+.eyebrow { font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.cash { padding: 16px 18px; }
+.cash-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.cash-head strong { font: 600 20px var(--serif); color: var(--navy); }
+.bar { position: relative; height: 30px; display: flex; border-radius: 6px; overflow: visible; }
+.seg { height: 100%; display: flex; align-items: center; padding: 0 9px; color: #fff; font-size: 11.5px; font-weight: 600;
+       white-space: nowrap; overflow: hidden; }
+.seg:first-child { border-radius: 6px 0 0 6px; } .seg.left { border-radius: 0 6px 6px 0; }
+.seg.rent { background: var(--facilities); } .seg.inv { background: var(--accounting); }
+.seg.left { background: #dfe9df; color: var(--ok); padding: 0 6px; justify-content: center; }
+.over { position: absolute; top: -5px; height: 40px; border: 2px dashed var(--bad); border-radius: 6px; background: rgba(140,58,58,.06); }
+.over span { position: absolute; top: 44px; right: 0; font-size: 11px; color: var(--bad); white-space: nowrap; font-weight: 600; }
+.cash-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 30px; font-size: 12px; color: var(--ink-soft); }
+.cash-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+.links { padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+.link-row { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--ink-soft); }
+.link-row .ic { flex: none; width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; background: var(--tint); }
+.link-row .ic svg { width: 16px; height: 16px; stroke: var(--navy); }
+.link-row b { color: var(--ink); }
+
+/* ------------------------------------------------------ ticket head */
+.ticket-head { display: flex; gap: 18px; align-items: stretch; padding: 16px 18px; margin-bottom: 18px; }
+.t-num { flex: none; width: 84px; border-radius: 10px; background: var(--navy); color: #fff; display: flex; flex-direction: column;
+         align-items: center; justify-content: center; }
+.t-num small { font-size: 10px; letter-spacing: .1em; opacity: .7; } .t-num b { font: 600 26px var(--serif); }
+.t-body { flex: 1; min-width: 0; }
+.t-body h2 { margin: 0 0 2px; font: 600 20px/1.25 var(--serif); color: var(--ink); }
+.t-body .quote { color: var(--ink-soft); font-style: italic; margin: 0 0 10px; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px; }
+.fact { background: var(--tile); border: 1px solid var(--line); border-radius: 7px; padding: 5px 10px; font-size: 12.5px; }
+.fact span { color: var(--muted); margin-right: 5px; }
+.fact.alert { background: #fbf0ef; border-color: #e9cfcd; color: var(--bad); }
+.fact.good { background: #edf4ee; border-color: #cfe1d3; color: var(--ok); }
+.t-side { flex: none; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; justify-content: center; }
+.chip { font-size: 11.5px; font-weight: 600; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line-strong); color: var(--ink-soft); background: var(--card); white-space: nowrap; }
+.chip.hi { background: #fbecd3; border-color: #efd2a2; color: var(--warn); }
+.chip.open { background: var(--tint); border-color: #cbd9ea; color: var(--navy); }
+.chip.ok { background: #e3f0e6; border-color: #c4dccb; color: var(--ok); }
+.chip.bad { background: #fbf0ef; border-color: #e9cfcd; color: var(--bad); }
+
+/* ------------------------------------------------- expected vs actual */
+.compare { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(6, auto); column-gap: 18px; row-gap: 0; }
+.compare > .panel { display: grid; grid-row: span 6; grid-template-rows: subgrid; }
+.panel { padding: 0; overflow: hidden; }
+.panel-head { display: flex; align-items: center; gap: 10px; padding: 13px 18px; border-bottom: 1px solid var(--line); }
+.panel-head h3 { margin: 0; font: 600 16px var(--serif); }
+.panel-head .badge { margin-left: auto; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px; }
+.panel.expected .panel-head { background: var(--tint); } .panel.expected .panel-head h3 { color: var(--navy); }
+.panel.expected .badge { background: var(--navy); color: #fff; }
+.panel.actual .panel-head { background: var(--tile); } .panel.actual .panel-head h3 { color: var(--ink-soft); }
+.panel.actual .badge { background: var(--paper-2); color: var(--muted); border: 1px dashed var(--line-strong); }
+.panel-head .hicon { width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center; background: #fff; border: 1px solid var(--line); }
+.panel-head .hicon svg { width: 15px; height: 15px; stroke: var(--navy); }
+.sec { padding: 14px 18px 16px; border-bottom: 1px solid var(--line); }
+.sec:last-child { border-bottom: 0; }
+.sec-title { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.sec-title .n { width: 20px; height: 20px; border-radius: 50%; background: var(--paper-2); color: var(--ink-soft); font-size: 11px; font-weight: 700; display: grid; place-items: center; }
+.sec-title .hint { margin-left: auto; font-size: 11.5px; color: var(--muted); }
+
+.story { font-size: 13.5px; color: var(--ink-soft); min-height: 118px; }
+.story p { margin: 0 0 8px; } .story p:last-child { margin-bottom: 0; }
+.story b { color: var(--ink); }
+.placeholder { border: 1.5px dashed var(--line-strong); border-radius: var(--r); background: repeating-linear-gradient(-45deg, var(--tile), var(--tile) 8px, #f9f8f6 8px, #f9f8f6 16px);
+               color: var(--muted); display: flex; align-items: center; justify-content: center; text-align: center; padding: 14px; font-size: 12.5px; }
+
+/* agents strip */
+.agents { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.agent { border: 1px solid var(--line); border-radius: 10px; padding: 10px 6px 9px; text-align: center; background: var(--off-bg);
+         transition: all .3s var(--ease); position: relative; }
+.agent .av { width: 40px; height: 40px; margin: 0 auto 6px; border-radius: 50%; display: grid; place-items: center; background: #fff; border: 1.5px solid var(--off); }
+.agent .av svg { width: 20px; height: 20px; stroke: var(--off); }
+.agent .nm { font-weight: 600; font-size: 12.5px; color: var(--off); }
+.agent .rl { font-size: 10.5px; color: var(--off); line-height: 1.3; }
+.agent.on { background: #fff; border-color: var(--c); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 12%, transparent); }
+.agent.on .av { background: var(--c); border-color: var(--c); } .agent.on .av svg { stroke: #fff; }
+.agent.on .nm { color: var(--c); } .agent.on .rl { color: var(--ink-soft); }
+.agent .cnt { position: absolute; top: 6px; right: 6px; min-width: 18px; height: 18px; border-radius: 9px; font-size: 10.5px; font-weight: 700;
+              background: var(--c); color: #fff; display: none; place-items: center; padding: 0 5px; }
+.agent.on .cnt { display: grid; }
+
+/* flow diagram */
+.flow-wrap { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.diagram { width: 100%; height: auto; display: block; background: radial-gradient(circle at 50% 45%, #fbfaf8 0, var(--tile) 70%); border: 1px solid var(--line); border-radius: 10px; }
+.diagram .node circle.ring { fill: #fff; stroke: var(--off); stroke-width: 1.5; transition: all .3s var(--ease); }
+.diagram .node .nicon { stroke: var(--off); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.diagram .node text { font: 600 11.5px var(--sans); fill: var(--off); }
+.diagram .node.on circle.ring { stroke-width: 0; }
+.diagram .node.on .nicon { stroke: #fff; }
+.diagram .node.on text { fill: var(--ink); }
+.diagram .edge { fill: none; stroke-width: 2.2; stroke-linecap: round; transition: opacity .2s; }
+.diagram .edge.draw { animation: draw .7s var(--ease) both; }
+@keyframes draw { from { stroke-dashoffset: var(--len); } to { stroke-dashoffset: 0; } }
+.diagram .badge-step { transition: transform .2s; }
+.diagram .badge-step circle { stroke: #fff; stroke-width: 2; }
+.diagram .badge-step text { font: 700 11px var(--sans); fill: #fff; }
+.diagram g.step.dim { opacity: .18; }
+.diagram .empty-note { font: 500 12px var(--sans); fill: var(--muted); }
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; min-height: 250px; }
+.steps li { display: grid; grid-template-columns: 24px 1fr; gap: 10px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 9px; background: #fff;
+            cursor: default; transition: border-color .15s, background .15s; font-size: 12.8px; }
+.steps li:hover { border-color: var(--line-strong); background: var(--tile); }
+.steps .sn { width: 22px; height: 22px; border-radius: 50%; color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center; }
+.steps .sn.zero { background: var(--paper-2) !important; color: var(--ink-soft); }
+.steps .who { font-weight: 600; color: var(--ink); }
+.steps .who .arr { color: var(--muted); margin: 0 4px; font-weight: 400; }
+.steps .what { color: var(--ink-soft); }
+.steps .tl { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 4px; }
+.steps .tl code { font-size: 10.5px; padding: 1px 6px; border-radius: 4px; background: var(--tint); color: var(--navy); }
+.steps .tl code.cond { background: #fff; border: 1px dashed var(--gold-deep); color: var(--warn); }
+.steps li.ph { border-style: dashed; background: var(--tile); color: var(--muted); }
+.steps li.ph .sn { background: var(--paper-2); color: var(--muted); }
+.steps li.ph .bar-ph { height: 9px; border-radius: 4px; background: var(--paper-2); margin-top: 6px; }
+
+/* tools */
+.tools { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.tool { display: flex; align-items: center; gap: 9px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 9px; background: var(--off-bg);
+        position: relative; transition: all .3s var(--ease); min-width: 0; }
+.tool .ti { flex: none; width: 28px; height: 28px; border-radius: 7px; display: grid; place-items: center; background: #fff; border: 1px solid var(--line); }
+.tool .ti svg { width: 15px; height: 15px; stroke: var(--off); }
+.tool .tn { font-family: var(--mono); font-size: 11.3px; color: var(--off); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tool .who { margin-left: auto; display: flex; gap: 3px; flex: none; }
+.tool .who i { width: 8px; height: 8px; border-radius: 50%; display: block; }
+.tool.on { background: #fff; border-color: #b9cbe0; }
+.tool.on .ti { background: var(--navy); border-color: var(--navy); } .tool.on .ti svg { stroke: #fff; }
+.tool.on .tn { color: var(--ink); font-weight: 600; }
+.tool.cond { background: #fffaf2; border: 1.5px dashed var(--gold-deep); }
+.tool.cond .ti { background: #fff; border-color: var(--gold); } .tool.cond .ti svg { stroke: var(--gold-deep); }
+.tool.cond .tn { color: var(--warn); font-weight: 600; }
+.tool.cond::after { content: "IF"; position: absolute; top: -7px; right: 8px; font-size: 9px; font-weight: 800; letter-spacing: .06em;
+                    background: var(--gold); color: #fff; padding: 1px 5px; border-radius: 4px; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; font-size: 11.5px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend .sw { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--line); background: var(--off-bg); }
+.legend .sw.on { background: var(--navy); border-color: var(--navy); }
+.legend .sw.cond { background: #fffaf2; border: 1.5px dashed var(--gold-deep); }
+.legend i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+/* outcome */
+.outcome { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.oc { border: 1px solid var(--line); border-radius: 9px; padding: 9px 11px; background: #fff; min-height: 76px; }
+.oc .k { display: flex; align-items: center; gap: 6px; font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: 4px; }
+.oc .k svg { width: 13px; height: 13px; stroke: var(--muted); }
+.oc .v { font-size: 12.8px; color: var(--ink); }
+.oc .v .st { display: inline-block; font-family: var(--mono); font-size: 11.5px; padding: 1px 7px; border-radius: 5px; background: var(--tint); color: var(--navy); }
+.oc.wide { grid-column: span 2; }
+.oc.human { border-color: #efd2a2; background: #fffaf2; }
+.oc.human .k, .oc.human .k svg { color: var(--warn); stroke: var(--warn); }
+.oc.ph { border-style: dashed; background: var(--tile); }
+.oc.ph .v { color: var(--muted); }
+
+/* cash tab */
+.cash-tab { display: grid; gap: 18px; }
+.cash-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.ck { padding: 16px 18px; } .ck b { display: block; font: 600 26px var(--serif); color: var(--navy); margin-top: 4px; }
+.ck.final b { color: var(--ok); } .ck.paid b { color: var(--bad); }
+.ck small { color: var(--muted); font-size: 12px; }
+.water { padding: 18px 20px; }
+.wf { display: grid; grid-template-columns: 210px 1fr 110px; gap: 10px 14px; align-items: center; margin-top: 12px; }
+.wf .lbl { font-size: 13px; } .wf .lbl small { display: block; color: var(--muted); font-size: 11.5px; }
+.wf .track { position: relative; height: 28px; background: var(--tile); border-radius: 6px; border: 1px solid var(--line); }
+.wf .bar { position: absolute; top: 3px; bottom: 3px; border-radius: 4px; display: flex; align-items: center; padding: 0 8px; color: #fff; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+.wf .bar.bal { background: var(--navy); } .wf .bar.out { background: repeating-linear-gradient(-45deg, #b75a5a, #b75a5a 6px, var(--bad) 6px, var(--bad) 12px); }
+.wf .bar.fin { background: var(--ok); }
+.wf .amt { text-align: right; font: 600 14px var(--serif); } .wf .amt.neg { color: var(--bad); } .wf .amt.pos { color: var(--navy); }
+.ledger { padding: 0; overflow: hidden; }
+.ledger table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ledger th { text-align: left; font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); background: var(--tile); padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.ledger td { padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.ledger tr:last-child td { border-bottom: 0; }
+.ledger td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ledger .tk { display: inline-block; font-weight: 700; color: #fff; background: var(--navy); border-radius: 5px; padding: 1px 7px; font-size: 11.5px; }
+.ledger tfoot td { font-weight: 700; background: var(--tint); }
+.per-ticket { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.pt { padding: 14px 16px; } .pt h4 { margin: 0 0 4px; font: 600 15px var(--serif); color: var(--navy); }
+.pt b { font: 600 20px var(--serif); } .pt p { margin: 6px 0 0; font-size: 12.5px; color: var(--ink-soft); }
+.verify { padding: 12px 16px; font-size: 12.5px; color: var(--ink-soft); display: flex; gap: 10px; align-items: flex-start; }
+.verify svg { width: 18px; height: 18px; stroke: var(--ok); flex: none; margin-top: 1px; }
+@media (max-width: 900px) { .cash-kpis, .per-ticket { grid-template-columns: 1fr 1fr; } .wf { grid-template-columns: 1fr; } }
+
+/* reflection tab */
+.rf { display: grid; gap: 18px; }
+.rf-hero { padding: 20px 22px; display: grid; grid-template-columns: 1.3fr 1fr; gap: 20px; align-items: center; }
+.rf-hero h2 { margin: 4px 0 6px; font: 600 24px var(--serif); color: var(--navy); }
+.rf-hero p { margin: 0; color: var(--ink-soft); }
+.rf-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.rf-stat { background: var(--tile); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.rf-stat b { display: block; font: 600 18px var(--serif); color: var(--navy); }
+.rf-stat span { font-size: 11.5px; color: var(--muted); }
+.rf-q { padding: 0; overflow: hidden; }
+.rf-qhead { display: flex; gap: 12px; align-items: center; padding: 14px 18px; background: var(--tint); border-bottom: 1px solid var(--line); }
+.rf-num { width: 32px; height: 32px; border-radius: 50%; background: var(--navy); color: #fff; display: grid; place-items: center; font: 600 15px var(--serif); flex: none; }
+.rf-qhead h3 { margin: 0; font: 600 16.5px var(--serif); color: var(--ink); }
+.rf-body { padding: 16px 18px 18px; display: grid; gap: 14px; }
+.rf-answer { font-size: 14px; color: var(--ink-soft); line-height: 1.6; }
+.rf-answer p { margin: 0 0 9px; } .rf-answer p:last-child { margin: 0; }
+.rf-quote { border-left: 3px solid var(--gold); background: #fffaf2; padding: 10px 14px; border-radius: 0 9px 9px 0; font-style: italic; color: var(--ink-soft); }
+.rf-grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.rf-card { border: 1px solid var(--line); border-radius: 11px; padding: 12px 14px; background: #fff; display: flex; flex-direction: column; gap: 8px; }
+.rf-card h4 { margin: 0; font: 600 15px var(--serif); color: var(--navy); display: flex; align-items: center; gap: 8px; }
+.rf-card p { margin: 0; font-size: 13px; color: var(--ink-soft); line-height: 1.55; }
+.rf-card .lbl { font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.rf-verdict { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; align-self: flex-start; }
+.rf-verdict.good { background: #e3f0e6; color: var(--ok); } .rf-verdict.mid { background: #fbecd3; color: var(--warn); } .rf-verdict.low { background: #fbf0ef; color: var(--bad); }
+.rf-facts { display: flex; flex-wrap: wrap; gap: 6px; }
+.rf-fact { font-size: 11.5px; padding: 3px 8px; border-radius: 6px; background: var(--tile); border: 1px solid var(--line); color: var(--ink-soft); }
+.rf-fact b { color: var(--ink); }
+.rf-agents { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; font-size: 11.5px; color: var(--muted); }
+.rf-ag { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; }
+.rf-ag svg { width: 12px; height: 12px; stroke: #fff; }
+.rf-ag.off { background: var(--off-bg); border: 1px solid var(--off); } .rf-ag.off svg { stroke: var(--off); }
+.rf-vs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.rf-vs > div { background: var(--tile); border: 1px solid var(--line); border-radius: 9px; padding: 8px 10px; }
+.rf-link { align-self: flex-start; font: 600 12px var(--sans); color: var(--navy); background: var(--tint); border: 1px solid #cbd9ea; border-radius: 7px; padding: 4px 10px; cursor: pointer; }
+.rf-link:hover { background: #dce7f4; }
+.rf-tools { display: flex; flex-wrap: wrap; gap: 5px; }
+.rf-tool { display: inline-flex; align-items: center; gap: 5px; font: 11px var(--mono); padding: 3px 7px; border-radius: 6px; background: var(--tint); color: var(--navy); }
+.rf-tool svg { width: 12px; height: 12px; stroke: var(--navy); }
+.rf-tool.new { background: #fff; border: 1.5px dashed var(--gold-deep); color: var(--warn); font-family: var(--sans); font-weight: 600; }
+.rf-solo { display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: center; }
+.rf-solo .arrow { font: 600 22px var(--serif); color: var(--muted); }
+.rf-human { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 9px; background: #fffaf2; border: 1px solid #efd2a2; font-size: 13px; color: var(--warn); }
+.rf-human svg { width: 18px; height: 18px; stroke: var(--warn); flex: none; }
+@media (max-width: 1000px) { .rf-hero, .rf-grid3, .rf-solo, .rf-vs { grid-template-columns: 1fr; } .rf-solo .arrow { transform: rotate(90deg); justify-self: center; } }
+
+/* coming later */
+.later { padding: 70px 24px; text-align: center; }
+.later .big { width: 64px; height: 64px; border-radius: 16px; background: var(--tint); display: grid; place-items: center; margin: 0 auto 14px; }
+.later .big svg { width: 30px; height: 30px; stroke: var(--navy); }
+.later h2 { margin: 0 0 6px; font: 600 22px var(--serif); color: var(--navy); }
+.later p { margin: 0; color: var(--muted); }
+
+footer { max-width: 1440px; margin: 0 auto; padding: 0 32px 32px; color: var(--muted); font-size: 12px; display: flex; gap: 16px; flex-wrap: wrap; }
+
+svg.i { fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+@media (max-width: 1100px) {
+  .compare, .connected { grid-template-columns: 1fr; }
+  .compare { grid-template-rows: none; row-gap: 18px; } .compare > .panel { grid-row: auto; grid-template-rows: none; }
+}
+@media (max-width: 640px) {
+  main, .top-inner { padding-left: 16px; padding-right: 16px; }
+  .tools, .outcome { grid-template-columns: 1fr; } .oc.wide { grid-column: auto; }
+  .agents { grid-template-columns: repeat(5, minmax(0,1fr)); gap: 4px; } .agent .rl { display: none; }
+  .ticket-head { flex-wrap: wrap; } .brand .meta { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <div class="logo"><svg class="i" viewBox="0 0 24 24"><path d="M20.4 6.6 12 2 3.6 6.6v10.8L12 22l8.4-4.6z"/><path d="M8 9.5c1-1.5 2.4-2 4-2 2.5 0 4 1.6 4 1.6M8 14.5s1.5 2 4 2c1.6 0 3-.5 4-2"/></svg></div>
+      <div>
+        <h1>Campus Customs · Operations Desk</h1>
+        <p>What I expected the five agents to do, next to what actually happened in the final run</p>
+      </div>
+      <div class="meta">
+        <span class="pill"><span class="dot"></span>Shop date · Aug 31, 2026</span>
+        <span class="pill">3 tickets · 1 resolved</span>
+        <span class="pill">Final run · Oct 11, 2026</span>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist" id="tabs"></nav>
+  </div>
+</header>
+
+<main id="main"></main>
+
+<footer>
+  <span>Source: <code>data/campus_customs_new.db</code> (tickets, inventory, pricing, vendors, invoices, leases, cash_accounts, desk) and the 14 agent tools in <code>mcp_server/server.py</code>.</span>
+  <span>Human-only payment tools (approve / reject / execute) are not agent tools and are not shown.</span>
+</footer>
+
+<script>
+/* =====================================================================
+   DATA. Everything below comes from the working database and the MCP
+   server. EXPECTED is my plan (Problem 6). ACTUAL is filled after the
+   agents run (Problem 9) using the exact same shape, so both panels
+   render through the same function and look identical.
+   ===================================================================== */
+
+const ICON = {
+  boss: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18M11 13v2h2v-2"/>',
+  inventory: '<path d="M21 8 12 3 3 8l9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8M12 13v8"/>',
+  accounting: '<rect x="5" y="2.5" width="14" height="19" rx="2"/><path d="M8 6.5h8M8 11h.01M12 11h.01M16 11h.01M8 14.5h.01M12 14.5h.01M16 14.5h.01M8 18h8"/>',
+  facilities: '<path d="M3 21h18M5 21V8l7-4.5L19 8v13M9.5 21v-5h5v5M9 10.5h.01M15 10.5h.01"/>',
+  customer_service: '<path d="M21 14.5a2 2 0 0 1-2 2H8l-5 4.5V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 8.5h8M8 12h5"/>',
+
+  list_open_tickets: '<path d="M9 6h12M9 12h12M9 18h12"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
+  get_ticket_details: '<path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4z"/><path d="M14 6v2M14 11v2M14 16v2"/>',
+  update_ticket_status: '<circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.7 2.7L16 9.5"/>',
+  check_stock_availability: '<path d="M20 7.5 12 3 4 7.5l8 4.5 8-4.5z"/><path d="M4 7.5v8L12 20M20 7.5V12M12 12v8"/><circle cx="18" cy="17" r="3"/><path d="m20.2 19.2 1.8 1.8"/>',
+  list_vendors: '<path d="M3 9.5 4.6 4h14.8L21 9.5M3 9.5h18M3 9.5V20h18V9.5M9.5 20v-5.5h5V20"/>',
+  get_vendor_status: '<path d="M1.5 6h12.5v10H1.5zM14 9.5h4l3.5 3.5v3H14z"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/>',
+  request_restock_order: '<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.6 12.2a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.6L22 7H6"/>',
+  get_cash_position: '<path d="M4 7a2 2 0 0 1 2-2h12v3.5"/><path d="M4 7v11a2 2 0 0 0 2 2h14V8.5H6A2 2 0 0 1 4 7z"/><circle cx="16" cy="14.3" r="1.2"/>',
+  get_invoice_details: '<path d="M5.5 3h13v18l-2.6-1.7-2.2 1.7-2.2-1.7-2.2 1.7-2.2-1.7L5.5 21z"/><path d="M9 8h6M9 11.5h6M9 15h3.5"/>',
+  get_pricing_and_margin: '<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.4"/>',
+  list_payment_requests: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2.5h6V4M9 10h6M9 13.5h6M9 17h3.5"/>',
+  request_payment_approval: '<path d="M12 3 20 6v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/>',
+  get_lease_details: '<circle cx="7.5" cy="15.5" r="4.5"/><path d="M10.7 12.3 20.5 2.5M17 6l3 3M14.3 8.7l2 2"/>',
+  draft_customer_message: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+
+  link: '<path d="M10 13.5a4.5 4.5 0 0 0 6.4.4l3-3a4.5 4.5 0 0 0-6.4-6.4l-1.6 1.6"/><path d="M14 10.5a4.5 4.5 0 0 0-6.4-.4l-3 3a4.5 4.5 0 0 0 6.4 6.4l1.6-1.6"/>',
+  wallet: '<path d="M4 7a2 2 0 0 1 2-2h12v3.5"/><path d="M4 7v11a2 2 0 0 0 2 2h14V8.5H6A2 2 0 0 1 4 7z"/>',
+  truck: '<path d="M1.5 6h12.5v10H1.5zM14 9.5h4l3.5 3.5v3H14z"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/>',
+  shield: '<path d="M12 3 20 6v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
+  plan: '<path d="M9 4h6M8 4H6a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2"/><path d="m8.5 13 2.3 2.3L15.5 11"/>',
+  run: '<circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l5.5-3.5z"/>',
+  flag: '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+  mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+  cash: '<rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v5M18 9.5v5"/>',
+  alert: '<path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/>',
+  status: '<path d="M3 12h4l3-8 4 16 3-8h4"/>',
+  chart: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  idea: '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.7.5 1.1 1.3 1.1 2.2h5c0-.9.4-1.7 1.1-2.2A6 6 0 0 0 12 3z"/>'
+};
+const svg = (name, cls = 'i') => `<svg class="${cls}" viewBox="0 0 24 24">${ICON[name]}</svg>`;
+
+const AGENTS = [
+  { id: 'boss', name: 'Boss', role: 'Delegates & decides' },
+  { id: 'inventory', name: 'Inventory', role: 'Stock & vendors' },
+  { id: 'accounting', name: 'Accounting', role: 'Cash & payments' },
+  { id: 'facilities', name: 'Facilities', role: 'Rent & leases' },
+  { id: 'customer_service', name: 'Customer Service', role: 'Drafts replies' }
+];
+const LABEL = Object.fromEntries(AGENTS.map(a => [a.id, a.name]));
+LABEL.human = 'You (human)';
+
+// The 14 agent-accessible MCP tools, in server order (mcp_server/server.py).
+const TOOLS = [
+  'list_open_tickets', 'get_ticket_details', 'update_ticket_status',
+  'check_stock_availability', 'list_vendors', 'get_vendor_status', 'request_restock_order',
+  'get_cash_position', 'get_invoice_details', 'get_pricing_and_margin', 'list_payment_requests',
+  'request_payment_approval', 'get_lease_details', 'draft_customer_message'
+];
+
+// Fixed positions in the flow diagram, the same on every ticket.
+const POS = {
+  boss: [260, 54], inventory: [112, 146], customer_service: [408, 146],
+  accounting: [150, 282], facilities: [370, 282]
+};
+
+const TICKETS = {
+  101: {
+    title: 'Classic Bulldog Tee, size S', type: 'customer_order', requester: 'Tauhid Zaman',
+    note: '"Needs a tee in size S."', created: 'Aug 31, 2026 · 9:15 AM',
+    chips: [['open', 'At start: open'], ['', 'Shares vendor with 103'], ['', 'Uses shared cash']],
+    facts: [['SKU', 'CC-TEE-WHITE · S'], ['Qty', '1'], ['On hand', '0 · Aisle B', 'alert'],
+            ['Vendor', 'Bulldog Print Co · 5-day lead'], ['Invoice #501', '$840 · due Aug 28 · overdue', 'alert'],
+            ['Unit cost', '$8 · list $28'], ['Earliest restock', 'Sep 5, only if unblocked']]
+  },
+  102: {
+    title: 'Rent due for the Chapel Street shop', type: 'rent_notice', requester: 'Elm City Properties',
+    note: '"Email: shop rent due in 2 days."', created: 'Aug 31, 2026 · 11:05 AM',
+    chips: [['hi', 'Priority: highest'], ['open', 'At start: open'], ['', 'Largest cash outflow']],
+    facts: [['Lease', '#1 · Chapel Street shop'], ['Landlord', 'Elm City Properties'], ['Rent', '$2,400'],
+            ['Due', 'Sep 2, 2026 · in 2 days', 'alert'], ['Checking', '$3,400', 'good'],
+            ['After rent', '$1,000'], ['After rent + #501', '$160']]
+  },
+  103: {
+    title: 'Bulk navy hoodie discount, size M', type: 'price_override', requester: 'Yale AI Club',
+    note: '"Student org wants 20 hoodies, size M, asking for a bulk discount."', created: 'Aug 31, 2026 · 4:55 PM',
+    chips: [['open', 'At start: open'], ['', 'Shares vendor with 101'], ['', 'Uses shared cash']],
+    facts: [['SKU', 'CC-HOOD-NAVY · M'], ['Qty', '20'], ['On hand', '8 · Aisle A · short 12', 'alert'],
+            ['Unit cost', '$22 · list $58'], ['Margin at list', '$36 / hoodie'], ['Restock 12', '$264 > $160 left', 'alert'],
+            ['Target price', 'not given', 'alert']]
+  }
+};
+
+const EXPECTED = {
+  101: {
+    story: [
+      'Boss reads the request and asks <b>Inventory</b> if we have the Classic Bulldog Tee in size S. We have <b>0</b>, so we need 1 more.',
+      'Bulldog Print Co is our apparel vendor, but it <b>can\'t ship</b> while invoice #501 ($840) is overdue. Inventory asks <b>Accounting</b> to look at that invoice and our cash, keeping the <b>$2,400 rent</b> in mind before recommending anything. If it makes sense and nothing is pending already, Accounting prepares the $840 payment for a human to approve. It does not pay it.',
+      'Inventory only prepares the $8 restock once the vendor is unblocked and cash allows it. With a 5-day lead time, we don\'t promise a date until the order is real. Boss then asks <b>Customer Service</b> to draft a message explaining the situation.'
+    ],
+    steps: [
+      { from: 'boss', to: null, what: 'Reads the customer request.', tools: ['get_ticket_details'] },
+      { from: 'boss', to: 'inventory', what: 'Do we have the Classic Bulldog Tee in size S?', tools: [] },
+      { from: 'inventory', to: 'accounting', what: '0 on hand, vendor blocked by overdue #501. Can we pay $840 and still cover rent?', tools: ['check_stock_availability', 'get_vendor_status'] },
+      { from: 'accounting', to: 'inventory', what: 'Reviews the invoice and all obligations; prepares the $840 request for a human if it makes sense.', tools: ['get_invoice_details', 'get_cash_position', 'list_payment_requests', 'request_payment_approval'] },
+      { from: 'inventory', to: 'boss', what: 'Shares the options. Restock ($8) only once the vendor is unblocked and cash allows.', tools: ['request_restock_order*'] },
+      { from: 'boss', to: 'customer_service', what: 'Draft a message about the delay and next steps, with no promised date.', tools: ['draft_customer_message', 'update_ticket_status*'] }
+    ],
+    tools: {
+      get_ticket_details: ['boss'], check_stock_availability: ['inventory'], get_vendor_status: ['inventory'],
+      get_invoice_details: ['accounting'], get_cash_position: ['accounting'], list_payment_requests: ['accounting'],
+      request_payment_approval: ['accounting'], draft_customer_message: ['customer_service']
+    },
+    conditional: { update_ticket_status: ['boss'], request_restock_order: ['inventory'] },
+    outcome: {
+      decision: 'Tee is out of stock and the vendor is blocked. Ask a human to approve paying invoice #501, then restock only when allowed.',
+      status: 'waiting_approval',
+      human: 'Pay invoice #501 to Bulldog Print Co, <b>$840</b>. Prepared by Accounting, waiting for a person.',
+      message: 'Draft for Tauhid: the tee is out of stock and we\'re working with the supplier. No delivery date promised yet.',
+      cash: '$0 moves now. If approved: −$840 → $2,560 (or $160 once rent is also paid).',
+      open: 'Restock (1 × $8) after the invoice is paid; delivery date once the order is confirmed.'
+    }
+  },
+  102: {
+    story: [
+      'This one goes <b>first</b>. Rent is due in two days, and not paying it puts the shop itself at risk.',
+      'Boss reads the notice and asks <b>Facilities</b> to check the lease, the $2,400 amount, the landlord and the due date. Facilities asks <b>Accounting</b> whether we can afford it. We can ($3,400 in checking), but Accounting also looks at the $840 overdue invoice and what\'s left for the other tickets.',
+      'Accounting checks that there\'s no rent request already, then prepares the <b>$2,400 rent payment for human approval</b> without paying it. It reports back to Facilities, Facilities tells Boss, and Boss keeps the ticket waiting until a person approves and the payment is actually done.'
+    ],
+    steps: [
+      { from: 'boss', to: null, what: 'Reads the rent notice.', tools: ['get_ticket_details'] },
+      { from: 'boss', to: 'facilities', what: 'Review lease #1: amount, landlord, due date.', tools: [] },
+      { from: 'facilities', to: 'accounting', what: '$2,400 due Sep 2. Can we cover it alongside our other obligations?', tools: ['get_lease_details'] },
+      { from: 'accounting', to: 'facilities', what: 'Covered ($3,400 → $1,000). No duplicate, so it prepares the rent request for a human.', tools: ['get_cash_position', 'list_payment_requests', 'request_payment_approval'] },
+      { from: 'facilities', to: 'boss', what: 'Rent request is waiting for approval; risk if left unpaid.', tools: ['update_ticket_status*'] }
+    ],
+    tools: {
+      get_ticket_details: ['boss'], get_lease_details: ['facilities'], get_cash_position: ['accounting'],
+      list_payment_requests: ['accounting'], request_payment_approval: ['accounting']
+    },
+    conditional: { update_ticket_status: ['boss'] },
+    outcome: {
+      decision: 'Pay rent first. It is affordable and the most urgent. Ticket stays waiting until a human approves and the payment is completed.',
+      status: 'waiting_approval',
+      human: 'Pay rent for lease #1 to Elm City Properties, <b>$2,400</b>. Prepared by Accounting, waiting for a person.',
+      message: 'None planned. The landlord isn\'t a customer, and agents don\'t send emails.',
+      cash: '$0 moves now. If approved: −$2,400 → $1,000 left.',
+      open: 'Human approval and execution of the rent payment.'
+    }
+  },
+  103: {
+    story: [
+      'Boss reads the request and asks <b>Inventory</b> if we have 20 navy hoodies in size M. We have <b>8</b>, so we\'re <b>12 short</b>, and the vendor is the same blocked Bulldog Print Co.',
+      'Inventory asks <b>Accounting</b> about the money side. Cost is $22 and list price $58, but the club <b>didn\'t say what discount it wants</b>, so Accounting flags that as missing instead of making one up. Restocking 12 would cost <b>$264</b>, and if rent and the overdue invoice are both paid, only <b>$160</b> is left.',
+      'So no discount approval, no restock order we can\'t afford, and no delivery promise. Boss asks <b>Customer Service</b> to draft a message asking the club for its target price and saying availability still needs to be confirmed.'
+    ],
+    steps: [
+      { from: 'boss', to: null, what: 'Reads the club\'s request.', tools: ['get_ticket_details'] },
+      { from: 'boss', to: 'inventory', what: 'Do we have 20 navy hoodies in size M?', tools: [] },
+      { from: 'inventory', to: 'accounting', what: '8 on hand, 12 short, vendor blocked. What\'s the cost and can we afford it?', tools: ['check_stock_availability', 'get_vendor_status'] },
+      { from: 'accounting', to: 'inventory', what: 'Margin $36 at list; no target price = missing info. $264 restock > $160 left.', tools: ['get_pricing_and_margin', 'get_cash_position'] },
+      { from: 'inventory', to: 'boss', what: 'Can\'t fill 20 or price a discount yet. Restock only if unblocked and affordable.', tools: ['request_restock_order*'] },
+      { from: 'boss', to: 'customer_service', what: 'Ask the club for its target price; availability still to be confirmed.', tools: ['draft_customer_message', 'update_ticket_status*'] }
+    ],
+    tools: {
+      get_ticket_details: ['boss'], check_stock_availability: ['inventory'], get_vendor_status: ['inventory'],
+      get_pricing_and_margin: ['accounting'], get_cash_position: ['accounting'], draft_customer_message: ['customer_service']
+    },
+    conditional: { update_ticket_status: ['boss'], request_restock_order: ['inventory'] },
+    outcome: {
+      decision: 'Missing information: no target price. Don\'t approve a discount, restock, or promise delivery yet.',
+      status: 'open (missing info)',
+      human: 'None. No payment or purchase is prepared, because the restock is not affordable and the vendor is blocked.',
+      message: 'Draft for Yale AI Club: ask for the proposed price or discount; 8 in stock now, the rest still to be confirmed.',
+      cash: '$0. A $264 restock would not fit in the $160 left after rent and #501 (−$104).',
+      open: 'Club\'s target price · vendor unblocked · cash for 12 hoodies.'
+    }
+  }
+};
+
+// Filled in Problem 9 with the agents' real results, using the same shape as EXPECTED.
+const ACTUAL = {"101": {"finalChip": ["open", "Final: in progress"], "story": ["Boss read the order and asked <b>Inventory</b> and <b>Accounting</b> at the same time, not one after the other. Inventory found <b>0</b> tees in size S. Accounting found invoice #501 ($840) <b>overdue and unpaid</b>, saw that rent was already paid, and said paying would leave $160. <b>Boss itself</b> prepared the $840 request (#2), and <b>Customer Service</b> drafted a reply with no date promised. <b>You approved #2</b>, so checking went $1,000 → $160.", "The agents continued automatically. Boss asked Inventory whether the now-unblocked vendor could supply the tee. Inventory checked the vendors and <b>asked Accounting directly</b> (peer to peer) if $8 was affordable. Accounting said yes, leaving $152. Inventory prepared <b>restock order #1</b> with request #3, and Boss saved an updated customer draft. <b>You approved #3</b>, so checking went $160 → $152, and the order was placed with arrival <b>Sep 5, 2026</b> (5-day lead time).", "In the last run Boss confirmed everything and kept the ticket <b>in progress</b>, not resolved, because the tee hasn't arrived and the order isn't fulfilled. That's the right call. Differences from my plan: Boss delegated to Inventory and Accounting in parallel instead of Inventory → Accounting, and Boss (not Accounting) prepared the invoice request."], "steps": [{"from": "boss", "to": null, "label": "Run 1 · Boss starts", "what": "Reads the customer order.", "tools": ["get_ticket_details"]}, {"from": "boss", "to": "inventory", "what": "Is one CC-TEE-WHITE size S in stock?", "tools": []}, {"from": "boss", "to": "accounting", "what": "Review invoice 501: is a payment needed? (asked in parallel)", "tools": []}, {"from": "accounting", "to": "boss", "what": "#501 is $840, 3 days overdue, nothing requested yet. Paying leaves $160. Only with human approval.", "tools": ["get_invoice_details", "list_payment_requests", "get_cash_position"]}, {"from": "inventory", "to": "boss", "what": "0 on hand, 1 short (Aisle B).", "tools": ["check_stock_availability"]}, {"from": "boss", "to": null, "label": "Boss prepares a payment", "what": "$840 for invoice #501 (request #2), waiting for a human.", "tools": ["request_payment_approval"]}, {"from": "boss", "to": "customer_service", "what": "Draft a reply: size S unavailable, no date promised.", "tools": []}, {"from": "customer_service", "to": "boss", "what": "Draft #1 saved, not sent.", "tools": ["draft_customer_message"]}, {"from": "human", "to": null, "label": "You approve #2", "what": "Invoice #501 paid: $840. Checking $1,000 → $160. Agents continue.", "tools": []}, {"from": "boss", "to": null, "label": "Run 2 · Boss continues", "what": "Re-reads the ticket after the payment.", "tools": ["get_ticket_details"]}, {"from": "boss", "to": "inventory", "what": "Invoice paid: can the vendor supply the tee now?", "tools": []}, {"from": "inventory", "to": "accounting", "what": "Vendor 1 unblocked, 5-day lead. Can we afford a 1-unit restock?", "tools": ["list_vendors", "get_vendor_status"]}, {"from": "accounting", "to": "inventory", "what": "$8 restock is affordable: $160 → $152.", "tools": ["get_pricing_and_margin", "get_cash_position"]}, {"from": "inventory", "to": null, "label": "Inventory prepares a purchase", "what": "Restock order #1 + request #3 ($8), waiting for a human.", "tools": ["request_restock_order"]}, {"from": "inventory", "to": "boss", "what": "Restock pending approval; arrival Sep 5 if approved today.", "tools": []}, {"from": "boss", "to": null, "label": "Boss updates the draft", "what": "Saves draft #2 for Tauhid (Boss called the tool itself).", "tools": ["draft_customer_message"]}, {"from": "human", "to": null, "label": "You approve #3", "what": "Restock paid: $8. Checking $160 → $152. Order placed, arrives Sep 5.", "tools": []}, {"from": "boss", "to": null, "label": "Run 3 · Boss wraps up", "what": "Confirms the order. Keeps the ticket in progress until the tee arrives.", "tools": ["get_ticket_details", "update_ticket_status"]}], "tools": {"get_ticket_details": ["boss"], "get_invoice_details": ["accounting"], "list_payment_requests": ["accounting"], "get_cash_position": ["accounting"], "check_stock_availability": ["inventory"], "request_payment_approval": ["boss"], "draft_customer_message": ["customer_service", "boss"], "list_vendors": ["inventory"], "get_vendor_status": ["inventory"], "get_pricing_and_margin": ["accounting"], "request_restock_order": ["inventory"], "update_ticket_status": ["boss"]}, "conditional": {}, "mcpCalls": 16, "outcome": {"decision": "Invoice #501 paid and one tee restocked (order #1, arrives Sep 5). Order not fulfilled yet, so the ticket is <b>not</b> resolved.", "status": "in_progress", "human": "You approved <b>#2</b> invoice #501, $840, and <b>#3</b> restock order #1, $8. Both executed.", "message": "Draft #2 to Tauhid (not sent): “Hi Tauhid, we’ve arranged a restock of your size S tee, pending internal approval. If approved, the expected restock date is September 5, 2026. We’ll update you if anything changes. Thank you for your patience.” It was written before you approved, so “pending internal approval” is now outdated.", "cash": "−$848: $1,000 → $160 → $152.", "open": "Tee arrives Sep 5 → fulfill the order. A person should update and send the draft."}}, "102": {"finalChip": ["ok", "Final: resolved"], "story": ["Run first, as I planned. Boss read the rent notice and asked <b>Facilities</b> to check lease #1. Facilities used the lease tool and reported $2,400 due Sep 2 (in 2 days), with checking covering it ($3,400 → $1,000).", "Then <b>Boss prepared the $2,400 rent request itself</b> (#1). Facilities never asked Accounting, so Accounting didn't take part. That's the main difference from my plan (Boss → Facilities → Accounting → Facilities → Boss). It's safe, because the request still needed a human and the tool checked the amount and cash.", "<b>You approved #1.</b> Checking went to $1,000, and lease #1's next due date moved to Oct 2. The agents continued automatically, Boss confirmed nothing was left, and the ticket became <b>resolved</b>, but only after the payment was actually executed."], "steps": [{"from": "boss", "to": null, "label": "Run 1 · Boss starts", "what": "Reads the rent notice.", "tools": ["get_ticket_details"]}, {"from": "boss", "to": "facilities", "what": "Check lease 1: amount, due date, days left, cash coverage.", "tools": []}, {"from": "facilities", "to": "boss", "what": "$2,400 due Sep 2 (2 days). Checking covers it: $1,000 left.", "tools": ["get_lease_details"]}, {"from": "boss", "to": null, "label": "Boss prepares a payment", "what": "$2,400 rent for lease #1 (request #1), waiting for a human.", "tools": ["request_payment_approval"]}, {"from": "human", "to": null, "label": "You approve #1", "what": "Rent paid: $2,400. Checking $3,400 → $1,000. Lease next due Oct 2. Agents continue.", "tools": []}, {"from": "boss", "to": null, "label": "Run 2 · Boss wraps up", "what": "Confirms the payment. Nothing left, so resolved.", "tools": ["get_ticket_details"]}], "tools": {"get_ticket_details": ["boss"], "get_lease_details": ["facilities"], "request_payment_approval": ["boss"]}, "conditional": {}, "mcpCalls": 4, "outcome": {"decision": "Rent paid after your approval. Nothing left to do, so <b>resolved</b>.", "status": "resolved", "human": "You approved <b>#1</b> rent for lease #1, $2,400. Executed.", "message": "None. The landlord isn't a customer.", "cash": "−$2,400: $3,400 → $1,000.", "open": "Nothing. Next rent due Oct 2, 2026."}}, "103": {"finalChip": ["bad", "Final: blocked · missing info"], "story": ["Boss read the request and went straight to <b>Accounting</b>, skipping Inventory. Accounting priced the hoodies ($22 cost, $58 list, $36 margin each, $720 for 20 at list) and reported <b>missing information</b>: the club gave no target price, so the discount can't be evaluated. Nothing was invented.", "Boss asked <b>Customer Service</b> to draft a reply. Customer Service <b>saved draft #3</b> asking the club for its proposed unit price. Then its final model call failed with a provider error (<b>HTTP 500</b> from gpt-6-luna). The error was caught and reported back. Boss's note says the draft was not created, but <b>the database shows draft #3 exists</b>.", "Final: <b>blocked · missing info</b>. No discount approved, no restock prepared, no delivery promised, no money moved. Differences from my plan: Inventory never checked stock (8 of 20) or the vendor, and the $264 restock vs. the $152 left was not discussed."], "steps": [{"from": "boss", "to": null, "label": "Run 1 · Boss starts", "what": "Reads the club's request.", "tools": ["get_ticket_details"]}, {"from": "boss", "to": "accounting", "what": "Evaluate the bulk discount for 20 hoodies: cost, list price, margin.", "tools": []}, {"from": "accounting", "to": "boss", "what": "$22 cost / $58 list / $36 margin. No target price, so missing info.", "tools": ["get_pricing_and_margin"]}, {"from": "boss", "to": "customer_service", "what": "Draft a reply asking for their proposed unit price.", "tools": []}, {"from": "customer_service", "to": "boss", "what": "Saved draft #3, then a provider HTTP 500 error. Reported as failed.", "tools": ["draft_customer_message"]}, {"from": "boss", "to": null, "label": "Boss decides", "what": "Missing information: blocked until the club gives a target price.", "tools": []}], "tools": {"get_ticket_details": ["boss"], "get_pricing_and_margin": ["accounting"], "draft_customer_message": ["customer_service"]}, "conditional": {}, "mcpCalls": 3, "outcome": {"decision": "Blocked by missing customer information (no target price). Discount not approved, no restock, no promise.", "status": "blocked (missing info)", "human": "None needed. No payment or purchase was prepared.", "message": "Draft #3 to Yale AI Club (not sent): “Thanks for your interest in ordering 20 CC-HOOD-NAVY hoodies in size M. What discounted unit price are you proposing? Once we have that figure, we can evaluate the margin and follow up. Any discount would be pending confirmation.”", "cash": "$0. Note: a $264 restock for the 12 missing hoodies would not fit in the $152 left.", "open": "Club's target price · stock (8 of 20) and vendor not checked · 12-hoodie restock unaffordable now."}}};  /*ACTUAL_DATA*/
+const CASH = {"start": 3400.0, "start_time": "11:36 PM", "start_note": "data/campus_customs_new.db restored from the original", "final": 152.0, "transactions": [{"payment_id": 1, "request_id": 1, "ticket": 102, "kind": "rent", "ref_id": 1, "amount": 2400.0, "title": "Rent · lease #1 (Elm City Properties)", "reason": "Rent due 2026-09-02; prepare payment for human approval for ticket 102.", "approved_by": "Isabel", "approved_time": "11:39 PM", "paid_at": "2026-08-31", "before": 3400.0, "after": 1000.0}, {"payment_id": 2, "request_id": 2, "ticket": 101, "kind": "invoice", "ref_id": 501, "amount": 840.0, "title": "Invoice #501 · Bulldog Print Co", "reason": "Pay overdue invoice linked to the rush reprint for ticket 101; stock is currently short and fulfillment depends on this reprint.", "approved_by": "Isabel", "approved_time": "11:39 PM", "paid_at": "2026-08-31", "before": 1000.0, "after": 160.0}, {"payment_id": 3, "request_id": 3, "ticket": 101, "kind": "restock", "ref_id": 1, "amount": 8.0, "title": "Restock order #1 · 1 × CC-TEE-WHITE S", "reason": "Restock 1 x CC-TEE-WHITE S from Bulldog Print Co", "approved_by": "Isabel", "approved_time": "11:40 PM", "paid_at": "2026-08-31", "before": 160.0, "after": 152.0}], "pending": [], "rejected": [], "no_payment_note": {"103": "No payment or purchase: discount needs a target price, no restock prepared."}, "verification": "Checked against the database: the <code>payments</code> table has 3 rows ($3,248 total), and $3,400 − $3,248 = <b>$152</b>, exactly the <code>cash_accounts</code> checking balance. Every payment has a named human approver. Pending or rejected requests: none."};  /*CASH_DATA*/
+
+/* =====================================================================
+   RENDERING. One function draws both panels, so they always match.
+   ===================================================================== */
+
+const TABS = [
+  { id: '101', label: 'Ticket 101', tag: 'Order' },
+  { id: '102', label: 'Ticket 102', tag: 'Rent' },
+  { id: '103', label: 'Ticket 103', tag: 'Discount' },
+  { id: 'cash', label: 'Cash' },
+  { id: 'reflection', label: 'Reflection' }
+];
+
+function connectedBanner() {
+  const pct = v => (v / 3400 * 100).toFixed(2) + '%';
+  return `
+  <section class="connected">
+    <div class="card cash">
+      <div class="cash-head">
+        <div><div class="eyebrow">One shared checking account</div><strong>$3,400</strong></div>
+        <div class="eyebrow" style="text-align:right">No incoming revenue assumed · never below $0</div>
+      </div>
+      <div class="bar">
+        <div class="seg rent" style="width:${pct(2400)}">Rent · ticket 102 · $2,400</div>
+        <div class="seg inv" style="width:${pct(840)}">Invoice #501 · $840</div>
+        <div class="seg left" style="width:${pct(160)}">$160</div>
+        <div class="over" style="left:${pct(3240)};width:${pct(264)}"><span>12 hoodies (103) · $264 → −$104 ✕</span></div>
+      </div>
+      <div class="cash-legend">
+        <span><i style="background:var(--facilities)"></i>Rent due Sep 2</span>
+        <span><i style="background:var(--accounting)"></i>Overdue vendor invoice (blocks 101 & 103)</span>
+        <span><i style="background:#dfe9df;border:1px solid #b9d3be"></i>Left if both are paid: tee restock $8 fits</span>
+      </div>
+    </div>
+    <div class="card links">
+      <div class="eyebrow">Why the tickets are connected</div>
+      <div class="link-row"><div class="ic">${svg('wallet')}</div><div><b>Same cash.</b> Every payment Boss approves for one ticket shrinks what's left for the others.</div></div>
+      <div class="link-row"><div class="ic">${svg('truck')}</div><div><b>Same vendor.</b> 101 and 103 both need Bulldog Print Co, which can't ship until invoice #501 is paid.</div></div>
+      <div class="link-row"><div class="ic">${svg('shield')}</div><div><b>Humans approve.</b> Agents only prepare payment requests; a person approves and executes.</div></div>
+    </div>
+  </section>`;
+}
+
+function ticketHead(id) {
+  const t = TICKETS[id];
+  return `
+  <section class="card ticket-head">
+    <div class="t-num"><small>TICKET</small><b>${id}</b></div>
+    <div class="t-body">
+      <div class="eyebrow">${t.type} · ${t.requester} · ${t.created}</div>
+      <h2>${t.title}</h2>
+      <p class="quote">${t.note}</p>
+      <div class="facts">${t.facts.map(([k, v, c]) => `<span class="fact ${c || ''}"><span>${k}</span>${v}</span>`).join('')}</div>
+    </div>
+    <div class="t-side">${ACTUAL[id] ? `<span class="chip ${ACTUAL[id].finalChip[0]}">${ACTUAL[id].finalChip[1]}</span>` : ''}${t.chips.map(([c, l]) => `<span class="chip ${c}">${l}</span>`).join('')}</div>
+  </section>`;
+}
+
+function involvement(data) {
+  const n = {};
+  if (!data) return n;
+  data.steps.forEach(s => { if (!s.to) { n[s.from] = n[s.from] || 0; return; } n[s.from] = (n[s.from] || 0) + 1; n[s.to] = (n[s.to] || 0) + 1; });
+  return n;
+}
+
+function agentsStrip(data) {
+  const n = involvement(data);
+  return `<div class="agents">${AGENTS.map(a => {
+    const on = a.id in n;
+    return `<div class="agent ${on ? 'on' : ''}" style="--c:var(--${a.id})" title="${on ? 'Involved' : 'Not involved'}">
+      <span class="cnt" title="Arrows in and out">${n[a.id] || 0}</span>
+      <div class="av">${svg(a.id)}</div><div class="nm">${a.name}</div><div class="rl">${a.role}</div></div>`;
+  }).join('')}</div>`;
+}
+
+function edgeGeometry(a, b, k = 0) {
+  const [x1, y1] = POS[a], [x2, y2] = POS[b];
+  const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy);
+  const ux = dx / len, uy = dy / len, nx = -uy, ny = ux, r = 33, bend = 26 + k * 46;  // repeated pairs curve wider
+  const sx = x1 + ux * r + nx * 8, sy = y1 + uy * r + ny * 8;
+  const ex = x2 - ux * (r + 4) + nx * 8, ey = y2 - uy * (r + 4) + ny * 8;
+  const cx = (x1 + x2) / 2 + nx * bend, cy = (y1 + y2) / 2 + ny * bend;
+  const mx = .25 * sx + .5 * cx + .25 * ex, my = .25 * sy + .5 * cy + .25 * ey;
+  return { d: `M${sx},${sy} Q${cx},${cy} ${ex},${ey}`, mx, my };
+}
+
+function diagram(data, key) {
+  const n = involvement(data);
+  const defs = AGENTS.map(a => `<marker id="ar-${key}-${a.id}" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--${a.id})"/></marker>`).join('');
+  let edges = '';
+  if (data) {
+    const seen = {};
+    data.steps.filter(s => s.to).forEach((s, i) => {
+      const pair = s.from + '>' + s.to;
+      seen[pair] = (seen[pair] ?? -1) + 1;
+      const g = edgeGeometry(s.from, s.to, seen[pair]);
+      edges += `<g class="step" data-step="${i + 1}">
+        <path class="edge draw" d="${g.d}" stroke="var(--${s.from})" marker-end="url(#ar-${key}-${s.from})"
+              style="stroke-dasharray:400;--len:400;animation-delay:${i * .28}s"/>
+        <g class="badge-step" transform="translate(${g.mx},${g.my})"><circle r="10" fill="var(--${s.from})"/><text text-anchor="middle" dy="3.8">${i + 1}</text></g>
+      </g>`;
+    });
+  }
+  const nodes = AGENTS.map(a => {
+    const [x, y] = POS[a.id], on = a.id in n;
+    const lbl = a.id === 'boss' ? 'y="-38" text-anchor="middle"'
+              : a.id === 'inventory' ? 'x="-36" y="4" text-anchor="end"' : 'y="47" text-anchor="middle"';
+    return `<g class="node ${on ? 'on' : ''}" transform="translate(${x},${y})">
+      <circle class="ring" r="27" style="${on ? `fill:var(--${a.id})` : ''}"/>
+      <g transform="translate(-11,-11) scale(.92)"><svg width="24" height="24" viewBox="0 0 24 24"><g class="nicon">${ICON[a.id]}</g></svg></g>
+      <text ${lbl}>${a.name}</text></g>`;
+  }).join('');
+  const empty = data ? '' : `<text class="empty-note" x="260" y="226" text-anchor="middle">Delegation arrows appear here after the agents run</text>`;
+  return `<svg class="diagram" viewBox="0 0 520 336" role="img" aria-label="Delegation flow"><defs>${defs}</defs>${edges}${nodes}${empty}</svg>`;
+}
+
+function stepsList(data) {
+  if (!data) {
+    return `<ol class="steps">${[0, 1, 2, 3, 4, 5].map(i => `<li class="ph"><span class="sn">${i}</span><div>${i === 0 ? 'Waiting for the real run' : '&nbsp;'}<div class="bar-ph" style="width:${[55, 80, 70, 88, 62, 74][i]}%"></div></div></li>`).join('')}</ol>`;
+  }
+  let k = 0;
+  return `<ol class="steps">${data.steps.map(s => {
+    const num = s.to ? ++k : 0;
+    const tools = s.tools.map(t => t.endsWith('*') ? `<code class="cond">if: ${t.slice(0, -1)}</code>` : `<code>${t}</code>`).join('');
+    const who = s.to ? `${LABEL[s.from]}<span class="arr">→</span>${LABEL[s.to]}` : (s.label || `${LABEL[s.from]} starts`);
+    return `<li data-step="${num}"><span class="sn ${num ? '' : 'zero'}" style="background:var(--${s.from})">${num || '•'}</span>
+      <div><div class="who">${who}</div><div class="what">${s.what}</div>${tools ? `<div class="tl">${tools}</div>` : ''}</div></li>`;
+  }).join('')}</ol>`;
+}
+
+function toolsGrid(data, mode = 'expected') {
+  const used = data ? data.tools : {}, cond = data ? data.conditional : {};
+  return `<div class="tools">${TOOLS.map(t => {
+    const state = t in used ? 'on' : t in cond ? 'cond' : '';
+    const who = (used[t] || cond[t] || []).map(a => `<i style="background:var(--${a})" title="${LABEL[a]}"></i>`).join('');
+    return `<div class="tool ${state}" title="${t}"><span class="ti">${svg(t)}</span><span class="tn">${t}</span><span class="who">${who}</span></div>`;
+  }).join('')}</div>
+  <div class="legend">
+    ${mode === 'expected' ? '<span><span class="sw on"></span>Expected</span><span><span class="sw cond"></span>Only if conditions allow</span><span><span class="sw"></span>Not needed</span>' : '<span><span class="sw on"></span>Used in the final run</span><span><span class="sw"></span>Not used</span>'}
+    ${AGENTS.map(a => `<span><i style="background:var(--${a.id})"></i>${a.name}</span>`).join('')}
+  </div>`;
+}
+
+function outcomeGrid(data) {
+  const o = data ? data.outcome : null;
+  const cell = (key, icon, label, cls = '') => `<div class="oc ${cls} ${o ? '' : 'ph'}">
+      <div class="k">${svg(icon)}${label}</div>
+      <div class="v">${o ? (key === 'status' ? `<span class="st">${o.status}</span>` : o[key]) : '—'}</div></div>`;
+  return `<div class="outcome">
+    ${cell('decision', 'flag', 'Boss decision', 'wide')}
+    ${cell('status', 'status', 'Ticket status')}
+    ${cell('cash', 'cash', 'Cash impact')}
+    ${cell('human', 'shield', 'Needs human approval', 'human wide')}
+    ${cell('message', 'mail', 'Customer message (draft only)', 'wide')}
+    ${cell('open', 'alert', 'Still open / waiting on', 'wide')}
+  </div>`;
+}
+
+function panel(id, mode) {
+  const data = mode === 'expected' ? EXPECTED[id] : ACTUAL[id];
+  const key = `${mode}-${id}`;
+  const exp = mode === 'expected';
+  const story = data
+    ? `<div class="story">${data.story.map(p => `<p>${p}</p>`).join('')}</div>`
+    : `<div class="story placeholder">The real story of what the agents did will go here after we run them in Problem 9.</div>`;
+  return `
+  <section class="card panel ${mode}" data-key="${key}">
+    <div class="panel-head">
+      <span class="hicon">${svg(exp ? 'plan' : 'run')}</span>
+      <h3>${exp ? 'Expected' : 'Actual'}</h3>
+      <span class="eyebrow">${exp ? 'My plan before running' : 'Real results from the agents'}</span>
+      <span class="badge">${exp ? 'Planned' : (data ? 'Recorded' : 'Not run yet')}</span>
+    </div>
+    <div class="sec"><div class="sec-title"><span class="n">1</span><span class="eyebrow">${exp ? 'What I expect' : 'What happened'}</span></div>${story}</div>
+    <div class="sec"><div class="sec-title"><span class="n">2</span><span class="eyebrow">Agents involved</span><span class="hint">badge = arrows in &amp; out</span></div>${agentsStrip(data)}</div>
+    <div class="sec"><div class="sec-title"><span class="n">3</span><span class="eyebrow">Delegation & communication flow</span><span class="hint">hover a step</span></div>
+      <div class="flow-wrap">${diagram(data, key)}${stepsList(data)}</div></div>
+    <div class="sec"><div class="sec-title"><span class="n">4</span><span class="eyebrow">MCP tools (14 agent tools)</span><span class="hint">${data ? (exp ? Object.keys(data.tools).length + ' expected · ' + Object.keys(data.conditional).length + ' conditional' : Object.keys(data.tools).length + ' used · ' + data.mcpCalls + ' MCP calls') : '&nbsp;'}</span></div>${toolsGrid(data, mode)}</div>
+    <div class="sec"><div class="sec-title"><span class="n">5</span><span class="eyebrow">Outcome summary</span></div>${outcomeGrid(data)}</div>
+  </section>`;
+}
+
+function cashView(c) {
+  const usd = v => (v < 0 ? '−$' : '$') + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: v % 1 ? 2 : 0 });
+  const pct = v => (v / c.start * 100).toFixed(2) + '%';
+  const paid = c.start - c.final;
+  const rows = c.transactions.map(t => `
+    <div class="lbl"><b>#${t.payment_id} · ${t.title}</b><small>Ticket ${t.ticket} · approved by ${t.approved_by}</small></div>
+    <div class="track"><div class="bar bal" style="left:0;width:${pct(t.after)}">${usd(t.after)}</div>
+      <div class="bar out" style="left:${pct(t.after)};width:${pct(t.amount)}">−${usd(t.amount)}</div></div>
+    <div class="amt neg">−${usd(t.amount)}</div>`).join('');
+  const byTicket = [101, 102, 103].map(id => {
+    const ts = c.transactions.filter(t => t.ticket === id);
+    const sum = ts.reduce((n, t) => n + t.amount, 0);
+    return `<div class="card pt"><h4>Ticket ${id}</h4><b>${sum ? '−' + usd(sum) : '$0'}</b>
+      <p>${ts.length ? ts.map(t => t.title).join(' + ') : c.no_payment_note[id]}</p></div>`;
+  }).join('');
+  return `<section class="cash-tab">
+    <div class="cash-kpis">
+      <div class="card ck"><div class="eyebrow">Starting balance (after reset)</div><b>${usd(c.start)}</b><small>${c.start_note}</small></div>
+      <div class="card ck paid"><div class="eyebrow">Completed payments</div><b>−${usd(paid)}</b><small>${c.transactions.length} payments, all approved by you</small></div>
+      <div class="card ck final"><div class="eyebrow">Final checking balance</div><b>${usd(c.final)}</b><small>cash_accounts · checking</small></div>
+      <div class="card ck"><div class="eyebrow">Pending / rejected</div><b>${c.pending.length} / ${c.rejected.length}</b><small>not counted as payments</small></div>
+    </div>
+    <div class="card water"><div class="eyebrow">How checking changed, payment by payment</div>
+      <div class="wf">
+        <div class="lbl"><b>Start</b><small>after reset · ${c.start_time}</small></div>
+        <div class="track"><div class="bar bal" style="left:0;width:100%">${usd(c.start)}</div></div><div class="amt pos">${usd(c.start)}</div>
+        ${rows}
+        <div class="lbl"><b>Final balance</b><small>never below $0</small></div>
+        <div class="track"><div class="bar fin" style="left:0;width:${pct(c.final)};min-width:44px">${usd(c.final)}</div></div><div class="amt pos">${usd(c.final)}</div>
+      </div></div>
+    <div class="card ledger"><table>
+      <thead><tr><th>#</th><th>Ticket</th><th>What was paid</th><th>Reason</th><th>Approved</th><th class="num">Before</th><th class="num">Amount</th><th class="num">After</th></tr></thead>
+      <tbody>${c.transactions.map(t => `<tr><td>${t.payment_id}</td><td><span class="tk">${t.ticket}</span></td><td><b>${t.title}</b><br><span style="color:var(--muted);font-size:12px">${t.kind} · ref ${t.ref_id} · request #${t.request_id}</span></td>
+        <td>${t.reason}</td><td>${t.approved_by}<br><span style="color:var(--muted);font-size:12px">${t.approved_time}</span></td>
+        <td class="num">${usd(t.before)}</td><td class="num" style="color:var(--bad)">−${usd(t.amount)}</td><td class="num"><b>${usd(t.after)}</b></td></tr>`).join('')}</tbody>
+      <tfoot><tr><td colspan="5">Total paid in the final run</td><td class="num">${usd(c.start)}</td><td class="num">−${usd(paid)}</td><td class="num">${usd(c.final)}</td></tr></tfoot>
+    </table></div>
+    <div class="per-ticket">${byTicket}</div>
+    <div class="card verify"><svg class="i" viewBox="0 0 24 24">${ICON.update_ticket_status}</svg><div>${c.verification}</div></div>
+  </section>`;
+}
+
+// ------------------------------------------------------------------ reflection (Problem 10)
+// My answers, with small grammar fixes. Ticket facts are read from ACTUAL / EXPECTED / CASH above,
+// so the reflection always matches the Expected vs. Actual and Cash tabs.
+const REFLECTION = {
+  q1: {
+    q: 'How would you evaluate the performance of the agents on each ticket and why?',
+    intro: 'Overall, I think the agents performed well on some tickets, but there is still room for improvement. I also think their performance depends on the type of task. They are especially good at systematic and routine activities, where the steps and rules are clear. I also like that the system requires human approval for sensitive decisions, such as payments, instead of allowing agents to act independently.',
+    verdicts: { 101: ['good', 'Handled well'], 102: ['good', 'Successfully resolved'], 103: ['low', 'Showed more limitations'] },
+    rest: [
+      'I think the biggest opportunity is improving how agents make decisions and communicate with each other. Programming the rules is not always enough to handle every situation, so I believe the system needs continuous testing and adjustments.',
+      'For example, after running the agents for the first time, I asked for some improvements to the backend and the way the agents interacted. When I ran the system again, it worked much better and felt closer to something that could actually be used in a real business.',
+    ],
+    quote: 'This showed me that improving an AI agent system is a process of trial and error, where testing it in real situations helps identify what needs to be adjusted.',
+  },
+  q2: {
+    q: 'For each ticket, how did Actual compare to the Expected plan you wrote earlier?',
+    tickets: {
+      101: ['I expected a simpler process, with Inventory checking stock, Accounting reviewing the financial situation, and Customer Service preparing the response. In reality, there were many more interactions between agents. Boss delegated to Inventory and Accounting in parallel, prepared the invoice payment request itself, and later Inventory communicated directly with Accounting to check if the restock was affordable.',
+            'The agents successfully handled the payments and restock, and correctly kept the ticket in progress because the product had not arrived yet. I think the result was good, but the process could have been more efficient.'],
+      102: ['The actual process was simpler than expected. I planned for Facilities to review the lease and Accounting to evaluate the payment, but Boss worked directly with Facilities and prepared the payment request itself.',
+            'The rent was successfully paid and the ticket was resolved. However, I think Accounting should have participated, because paying rent affects the cash available for the other tickets.'],
+      103: ['This was the biggest difference from my expectations. I expected Inventory to check stock and vendor availability, and Accounting to evaluate margins and possible discounts. Instead, Boss went directly to Accounting, and Inventory never participated. The agents focused on the missing target price and asked the customer for that information. I think they could have been more proactive by analyzing the margins and proposing a discount themselves.',
+            'Customer Service created a draft, but the final run had an error, and Boss incorrectly reported that the draft had not been created. This showed some weaknesses in communication and error handling.'],
+    },
+  },
+  q3: {
+    q: 'What would have been simpler as one agent with tools — and why?',
+    answer: 'I think the initial pricing analysis for Ticket 103 could have been handled by one agent with access to inventory, pricing, and margin tools. The agent could check available stock, calculate costs and margins, and recommend a possible discount without requiring multiple conversations. This would make the process faster and simpler.',
+    human: 'However, any final commercial decision that requires approval should still involve a human.',
+    tools: ['check_stock_availability', 'get_vendor_status', 'get_pricing_and_margin'],
+  },
+  q4: {
+    q: 'Describe three new problems Campus Customs might face that this agent team could solve with the tools you built.',
+    items: [
+      { title: 'A vendor becomes unavailable', agents: ['inventory'], tools: ['list_vendors', 'get_vendor_status'],
+        text: 'Inventory could review the available vendors, check their lead times and restrictions, and recommend an alternative supplier if one is available.' },
+      { title: 'Several upcoming payments with limited cash', agents: ['accounting', 'boss'],
+        tools: ['get_cash_position', 'get_invoice_details', 'get_lease_details', 'list_payment_requests', 'request_payment_approval'],
+        text: 'Accounting could review pending invoices, rent obligations, and the checking balance, while Boss helps prioritize which payments need attention first and prepares requests for human approval.' },
+      { title: 'A product that is not immediately available', agents: ['inventory', 'customer_service'],
+        tools: ['check_stock_availability', 'get_vendor_status', 'draft_customer_message'],
+        text: 'Inventory could check stock and possible restocking options, while Customer Service prepares a message explaining the availability and next steps without promising an unconfirmed delivery date.' },
+    ],
+  },
+  q5: {
+    q: 'Describe three new problems Campus Customs might face that this agent team could not solve with the tools you built, and explain the tools and agents you would need to solve them.',
+    items: [
+      { title: 'A customer wants to return or exchange a product', agents: ['customer_service', 'accounting'], newAgent: null,
+        need: ['Past orders lookup', 'Process returns', 'Update inventory', 'Issue refunds'],
+        text: 'We would need tools to check past orders, process returns, and update inventory and refunds. Customer Service and Accounting could handle this together.' },
+      { title: 'A supplier increases its prices', agents: ['inventory', 'accounting'], newAgent: 'Procurement Agent',
+        need: ['Compare suppliers', 'Analyze alternative costs', 'Negotiate new conditions'],
+        text: 'We would need tools to compare suppliers, analyze alternative costs, and negotiate new conditions. I would add a Procurement Agent to work with Inventory and Accounting.' },
+      { title: 'Sales are decreasing', agents: [], newAgent: 'Marketing Agent',
+        need: ['Historical sales analysis', 'Customer behavior data', 'Marketing performance'],
+        text: 'We would need tools to analyze historical sales, customer behavior, and marketing performance. I would add a Marketing Agent to identify opportunities and recommend strategies to increase sales.' },
+    ],
+  },
+};
+
+function reflectionView() {
+  const R = REFLECTION;
+  const usd = v => '$' + Math.abs(v).toLocaleString('en-US');
+  const paidFor = id => CASH ? CASH.transactions.filter(t => t.ticket === id).reduce((n, t) => n + t.amount, 0) : 0;
+  const agentDots = (ids, all = true) => AGENTS.filter(a => all || ids.includes(a.id)).map(a =>
+    `<span class="rf-ag ${ids.includes(a.id) ? '' : 'off'}" style="${ids.includes(a.id) ? `background:var(--${a.id})` : ''}" title="${a.name}">${svg(a.id)}</span>`).join('');
+  const involved = d => Object.keys(involvement(d)).filter(k => k !== 'human');
+  const toolChip = t => `<span class="rf-tool">${ICON[t] ? svg(t) : ''}${t}</span>`;
+  const factsFor = id => {
+    const a = ACTUAL[id];
+    const runs = a.steps.filter(s => /^Run \d/.test(s.label || '')).length || 1;
+    const paid = paidFor(id);
+    return `<div class="rf-facts">
+      <span class="rf-fact">Final: <b>${a.outcome.status}</b></span>
+      <span class="rf-fact"><b>${runs}</b> run${runs > 1 ? 's' : ''}</span>
+      <span class="rf-fact"><b>${a.steps.filter(s => s.to).length}</b> handoffs</span>
+      <span class="rf-fact"><b>${a.mcpCalls}</b> MCP calls</span>
+      <span class="rf-fact">Cash: <b>${paid ? '−' + usd(paid) : '$0'}</b></span></div>`;
+  };
+  const start = CASH ? CASH.start : 0, final = CASH ? CASH.final : 0;
+  const resolved = [101, 102, 103].filter(id => ACTUAL[id] && /resolved/.test(ACTUAL[id].outcome.status)).length;
+
+  const q1Cards = [101, 102, 103].map(id => {
+    const [cls, label] = R.q1.verdicts[id];
+    return `<div class="rf-card"><h4>Ticket ${id}</h4><span class="rf-verdict ${cls}">${label}</span>${factsFor(id)}
+      <div class="rf-agents">${agentDots(involved(ACTUAL[id]))}</div></div>`;
+  }).join('');
+
+  const q2Cards = [101, 102, 103].map(id => `<div class="rf-card">
+      <h4>Ticket ${id}</h4>
+      <div class="rf-vs">
+        <div><div class="lbl">Expected agents</div><div class="rf-agents">${agentDots(involved(EXPECTED[id]))}</div></div>
+        <div><div class="lbl">Actual agents</div><div class="rf-agents">${agentDots(involved(ACTUAL[id]))}</div></div>
+      </div>
+      ${R.q2.tickets[id].map(p => `<p>${p}</p>`).join('')}
+      ${factsFor(id)}
+      <button class="rf-link" onclick="show('${id}');window.scrollTo(0,0)">See Expected vs. Actual →</button>
+    </div>`).join('');
+
+  const q4Cards = R.q4.items.map((it, i) => `<div class="rf-card">
+      <h4><span class="rf-num" style="width:24px;height:24px;font-size:12px">${i + 1}</span>${it.title}</h4>
+      <p>${it.text}</p>
+      <div class="lbl">Agents</div><div class="rf-agents">${agentDots(it.agents, false)}<span>${it.agents.map(a => LABEL[a]).join(' + ')}</span></div>
+      <div class="lbl">Existing MCP tools</div><div class="rf-tools">${it.tools.map(toolChip).join('')}</div>
+    </div>`).join('');
+
+  const q5Cards = R.q5.items.map((it, i) => `<div class="rf-card">
+      <h4><span class="rf-num" style="width:24px;height:24px;font-size:12px;background:var(--gold-deep)">${i + 1}</span>${it.title}</h4>
+      <p>${it.text}</p>
+      <div class="lbl">Tools we would need (new)</div><div class="rf-tools">${it.need.map(n => `<span class="rf-tool new">+ ${n}</span>`).join('')}</div>
+      <div class="lbl">Agents</div><div class="rf-agents">${agentDots(it.agents, false)}${it.agents.length ? `<span>${it.agents.map(a => LABEL[a]).join(' + ')}</span>` : ''}
+        ${it.newAgent ? `<span class="rf-tool new">+ ${it.newAgent}</span>` : ''}</div>
+    </div>`).join('');
+
+  const qBlock = (n, q, body) => `<section class="card rf-q"><div class="rf-qhead"><span class="rf-num">${n}</span><h3>${q}</h3></div><div class="rf-body">${body}</div></section>`;
+
+  return `<section class="rf">
+    <div class="card rf-hero">
+      <div><div class="eyebrow">Problem 10 · Reflection</div><h2>What I learned from the final run</h2>
+        <p>My answers to the five reflection questions, connected to what actually happened on tickets 101, 102 and 103, the Expected vs. Actual comparisons, and the Cash tab.</p></div>
+      <div class="rf-stats">
+        <div class="rf-stat"><b>${resolved} of 3</b><span>tickets fully resolved</span></div>
+        <div class="rf-stat"><b>${usd(start)} → ${usd(final)}</b><span>checking (see Cash tab)</span></div>
+        <div class="rf-stat"><b>${CASH ? CASH.transactions.length : 0}</b><span>payments, all approved by me</span></div>
+      </div>
+    </div>
+    ${qBlock(1, R.q1.q, `<div class="rf-answer"><p>${R.q1.intro}</p></div>
+      <div class="rf-grid3">${q1Cards}</div>
+      <div class="rf-answer">${R.q1.rest.map(p => `<p>${p}</p>`).join('')}</div>
+      <div class="rf-quote">${R.q1.quote}</div>`)}
+    ${qBlock(2, R.q2.q, `<div class="rf-grid3">${q2Cards}</div>`)}
+    ${qBlock(3, R.q3.q, `<div class="rf-solo">
+        <div class="rf-card"><div class="lbl">What happened in Ticket 103</div><p>Boss → Accounting → Boss → Customer Service: ${ACTUAL[103].steps.filter(s => s.to).length} handoffs, and Inventory never joined.</p>
+          <div class="rf-agents">${agentDots(involved(ACTUAL[103]))}</div></div>
+        <div class="arrow">→</div>
+        <div class="rf-card"><div class="lbl">Simpler: one agent with tools</div><div class="rf-tools">${R.q3.tools.map(toolChip).join('')}</div>
+          <p>Stock, costs, margins and a suggested discount in a single step.</p></div>
+      </div>
+      <div class="rf-answer"><p>${R.q3.answer}</p></div>
+      <div class="rf-human">${svg('request_payment_approval')}<div>${R.q3.human}</div></div>`)}
+    ${qBlock(4, R.q4.q, `<div class="rf-grid3">${q4Cards}</div>`)}
+    ${qBlock(5, R.q5.q, `<div class="rf-grid3">${q5Cards}</div>`)}
+  </section>`;
+}
+
+function later(icon, title, text) {
+  return `<section class="card later"><div class="big">${svg(icon)}</div><h2>${title}</h2><p>${text}</p></section>`;
+}
+
+function render() {
+  document.getElementById('tabs').innerHTML = TABS.map(t =>
+    `<button class="tab" role="tab" data-tab="${t.id}" aria-selected="false">${t.label}${t.tag ? `<span class="tag">${t.tag}</span>` : ''}</button>`).join('');
+  document.getElementById('main').innerHTML =
+    ['101', '102', '103'].map(id => `<div class="view" data-view="${id}">${connectedBanner()}${ticketHead(id)}
+      <div class="compare">${panel(id, 'expected')}${panel(id, 'actual')}</div></div>`).join('') +
+    `<div class="view" data-view="cash">${CASH ? cashView(CASH) : later('chart', 'Cash · coming later', 'How each decision moves the shared $3,400 will be added in a later problem.')}</div>` +
+    `<div class="view" data-view="reflection">${reflectionView()}</div>`;
+
+  document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => show(b.dataset.tab)));
+
+  // Hovering a step highlights its arrow in the same panel.
+  document.querySelectorAll('.panel').forEach(p => {
+    p.querySelectorAll('.steps li[data-step]').forEach(li => {
+      const n = li.dataset.step;
+      li.addEventListener('mouseenter', () => { if (n === '0') return;
+        p.querySelectorAll('g.step').forEach(g => g.classList.toggle('dim', g.dataset.step !== n)); });
+      li.addEventListener('mouseleave', () => p.querySelectorAll('g.step').forEach(g => g.classList.remove('dim')));
+    });
+  });
+}
+
+function show(id) {
+  document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === id));
+  document.querySelectorAll('.view').forEach(v => {
+    const on = v.dataset.view === id;
+    v.classList.toggle('active', on);
+    // Replay the arrow animation each time a ticket is opened.
+    if (on) v.querySelectorAll('.edge.draw').forEach(e => { e.style.animation = 'none'; e.getBBox(); e.style.animation = ''; });
+  });
+  history.replaceState(null, '', '#' + id);
+}
+
+render();
+show((location.hash || '#101').slice(1) in { 101: 1, 102: 1, 103: 1, cash: 1, reflection: 1 } ? location.hash.slice(1) || '101' : '101');
+</script>
+</body>
+</html>

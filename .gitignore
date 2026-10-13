@@ -1,0 +1,35 @@
+# --- secrets ---
+.env
+.env.*
+!.env.example
+
+# --- Python ---
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# --- Node / Vite ---
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# --- runtime leftovers ---
+output/*.lock
+output/*.tmp
+output/.*.tmp
+data/*.resetting
+*.db-journal
+*.db-wal
+*.db-shm
+
+# --- local tooling / OS ---
+.claude/
+.DS_Store
+.vscode/
+.idea/
+
+# Both databases ARE committed on purpose:
+#   data/campus_customs.db      (original, never modified)
+#   data/campus_customs_new.db  (working copy with the final-run results)

@@ -1,0 +1,480 @@
+{
+  "base_url": "http://127.0.0.1:8001",
+  "temp_db": "p9_verify.db",
+  "checks": [
+    {
+      "check": "health uses temp database",
+      "passed": true,
+      "detail": {
+        "ok": true,
+        "model": "gpt-6-luna",
+        "database": "p9_verify.db",
+        "using_default_database": false,
+        "context": "test",
+        "active_runs": {}
+      }
+    },
+    {
+      "check": "GET /tickets returns 101, 102, 103 with status",
+      "passed": true,
+      "detail": {
+        "101": "open",
+        "102": "open",
+        "103": "open"
+      }
+    },
+    {
+      "check": "GET /cash matches the database",
+      "passed": true,
+      "detail": {
+        "today": "2026-08-31",
+        "checking_balance": 3400.0,
+        "committed_to_requests": 0.0,
+        "uncommitted_cash": 3400.0,
+        "open_invoice_total": 840.0,
+        "rent_due_within_7_days": 2400.0
+      }
+    },
+    {
+      "check": "POST /reset without exact confirmation is refused",
+      "passed": true,
+      "detail": {
+        "detail": "Reset needs {\"confirm\": \"RESET\"}."
+      }
+    },
+    {
+      "check": "POST /reset with no body field is refused",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "POST /tickets/102/run starts a run",
+      "passed": true,
+      "detail": "exec-20261011-233601-e44747"
+    },
+    {
+      "check": "Second run of the same ticket is refused while running",
+      "passed": true,
+      "detail": {
+        "detail": "Ticket 102 is already running (exec-20261011-233601-e44747)."
+      }
+    },
+    {
+      "check": "Reset is refused while a run is active",
+      "passed": true,
+      "detail": {
+        "detail": "Cannot reset while work is in progress: {102: 'exec-20261011-233601-e44747'}."
+      }
+    },
+    {
+      "check": "Run finishes with an execution status (not stuck)",
+      "passed": true,
+      "detail": {
+        "status": "completed",
+        "stop_reason": null,
+        "decision": {
+          "ticket_id": 102,
+          "status": "waiting_approval",
+          "decision": "Rent of $2,400 is due September 2, 2026, and checking covers it with $1,000 remaining. A payment request has been prepared; no money has moved, and human approval is required.",
+          "next_steps": [],
+          "approvals_needed": [
+            {
+              "payment_request_id": 1,
+              "what": "Pay rent, lease 1, $2,400"
+            }
+          ],
+          "customer_draft_id": null,
+          "unresolved": [],
+          "safety_flags": []
+        }
+      }
+    },
+    {
+      "check": "GET /activity shows delegations and tool calls for the run",
+      "passed": true,
+      "detail": {
+        "events": 17,
+        "delegations": [
+          [
+            "boss",
+            "facilities"
+          ]
+        ],
+        "tools": [
+          [
+            "boss",
+            "get_ticket_details"
+          ],
+          [
+            "facilities",
+            "get_lease_details"
+          ],
+          [
+            "boss",
+            "request_payment_approval"
+          ]
+        ]
+      }
+    },
+    {
+      "check": "Ticket 102 is waiting_approval with a pending rent request",
+      "passed": true,
+      "detail": {
+        "status": "waiting_approval",
+        "waiting": [
+          {
+            "id": 1,
+            "kind": "rent",
+            "ref_id": 1,
+            "amount": 2400.0,
+            "account": "checking",
+            "ticket_id": 102,
+            "reason": "Rent due 2026-09-02; prepare payment for human approval for ticket 102.",
+            "requested_by": "Boss",
+            "requested_at": "2026-10-11T23:36:03-04:00",
+            "status": "pending_approval",
+            "approved_by": null,
+            "decided_at": null,
+            "decision_note": null,
+            "payment_id": null
+          }
+        ]
+      }
+    },
+    {
+      "check": "No money moved before approval",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Approval without a name is refused",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "POST /payments/{id}/approve executes the payment",
+      "passed": true,
+      "detail": {
+        "ok": true,
+        "payment_request_id": 1,
+        "payment_id": 1,
+        "amount": 2400.0,
+        "checking_balance_after": 1000.0,
+        "lease_id": 1,
+        "new_next_due": "2026-10-02"
+      }
+    },
+    {
+      "check": "Ticket leaves waiting_approval but is not resolved by the approval",
+      "passed": true,
+      "detail": "in_progress"
+    },
+    {
+      "check": "Agents continue automatically after approval",
+      "passed": true,
+      "detail": {
+        "started": true,
+        "execution_id": "exec-20261011-233608-714374",
+        "ticket_id": 102,
+        "trigger": "approval of request #1",
+        "status": "running",
+        "started_at": "2026-10-11T23:36:08-04:00",
+        "finished_at": null,
+        "stop_reason": null,
+        "ticket_status": null,
+        "outcome": null
+      }
+    },
+    {
+      "check": "Approving the same request again is refused (no duplicate payment)",
+      "passed": true,
+      "detail": {
+        "detail": "Already paid. Duplicate payments are not allowed."
+      }
+    },
+    {
+      "check": "Database reflects the payment",
+      "passed": true,
+      "detail": {
+        "payments": [
+          [
+            "rent",
+            1,
+            2400.0,
+            "Isabel (test)"
+          ]
+        ],
+        "lease_next_due": "2026-10-02"
+      }
+    },
+    {
+      "check": "GET /cash shows the new balance",
+      "passed": true,
+      "detail": {
+        "today": "2026-08-31",
+        "checking_balance": 1000.0,
+        "committed_to_requests": 0,
+        "uncommitted_cash": 1000.0,
+        "open_invoice_total": 840.0,
+        "rent_due_within_7_days": 0
+      }
+    },
+    {
+      "check": "Continuation run finishes",
+      "passed": true,
+      "detail": {
+        "status": "completed",
+        "decision": {
+          "ticket_id": 102,
+          "status": "resolved",
+          "decision": "Rent payment request #1 was approved and executed for $2,400; checking balance after payment was $1,000. An updated customer reply was drafted for review (not sent), and the next rent due date is 2026-10-02.",
+          "next_steps": [],
+          "approvals_needed": [],
+          "customer_draft_id": 1,
+          "unresolved": [],
+          "safety_flags": []
+        },
+        "ticket_status": "resolved",
+        "tools": [
+          "get_ticket_details",
+          "draft_customer_message"
+        ]
+      }
+    },
+    {
+      "check": "Continuation did not repeat the payment request",
+      "passed": true,
+      "detail": [
+        [
+          1,
+          "rent",
+          "executed"
+        ]
+      ]
+    },
+    {
+      "check": "Final ticket status is consistent (no request waiting)",
+      "passed": true,
+      "detail": "resolved"
+    },
+    {
+      "check": "GET /runs lists both runs of ticket 102",
+      "passed": true,
+      "detail": [
+        [
+          "exec-20261011-233608-714374",
+          "approval of request #1",
+          "completed"
+        ],
+        [
+          "exec-20261011-233601-e44747",
+          "manual",
+          "completed"
+        ]
+      ]
+    },
+    {
+      "check": "POST /reset with confirmation restores the (temp) database",
+      "passed": true,
+      "detail": {
+        "ok": true,
+        "restored": "p9_verify.db",
+        "from": "campus_customs.db"
+      }
+    },
+    {
+      "check": "Real databases unchanged",
+      "passed": true,
+      "detail": {
+        "campus_customs.db": "23686a90d698f7fa6f901a3f0a9774db9cbb31e13151c9e5717275f3321f360a",
+        "campus_customs_new.db": "23686a90d698f7fa6f901a3f0a9774db9cbb31e13151c9e5717275f3321f360a"
+      }
+    }
+  ],
+  "first_run": {
+    "execution_id": "exec-20261011-233601-e44747",
+    "ticket_id": 102,
+    "trigger": "manual",
+    "status": "completed",
+    "started_at": "2026-10-11T23:36:01-04:00",
+    "finished_at": null,
+    "stop_reason": null,
+    "ticket_status": null,
+    "outcome": {
+      "execution_id": "exec-20261011-233601-e44747",
+      "ticket_id": 102,
+      "completed": true,
+      "stop_reason": null,
+      "agent_steps": 2,
+      "mcp_tool_calls": 3,
+      "decision": {
+        "ticket_id": 102,
+        "status": "waiting_approval",
+        "decision": "Rent of $2,400 is due September 2, 2026, and checking covers it with $1,000 remaining. A payment request has been prepared; no money has moved, and human approval is required.",
+        "next_steps": [],
+        "approvals_needed": [
+          {
+            "payment_request_id": 1,
+            "what": "Pay rent, lease 1, $2,400"
+          }
+        ],
+        "customer_draft_id": null,
+        "unresolved": [],
+        "safety_flags": []
+      },
+      "findings": [
+        {
+          "agent": "facilities",
+          "objective": "check lease 1 rent amount, due date, days until due, and whether checking covers rent; report facts and any safety warning.",
+          "status": "complete",
+          "summary": "Lease 1 rent is due September 2, 2026, and checking covers the payment. No safety warning was reported by the lease lookup.",
+          "facts": [
+            "Monthly rent: $2,400 \u2014 get_lease_details, lease 1.",
+            "Due date: 2026-09-02; 2 days until due \u2014 get_lease_details (today: 2026-08-31).",
+            "Checking balance: $3,400; after rent: $1,000; cash covers rent \u2014 get_lease_details."
+          ],
+          "recommendation": "",
+          "missing_info": [],
+          "payment_request_ids": [],
+          "safety_flags": []
+        }
+      ],
+      "unresolved": []
+    }
+  },
+  "first_run_activity": {
+    "delegations": [
+      {
+        "from": "boss",
+        "to": "facilities",
+        "objective": "Check lease 1 rent amount, due date, days until due, and whether checking covers rent; report facts and any safety warning.",
+        "status": "started",
+        "execution_id": "exec-20261011-233601-e44747",
+        "timestamp": "2026-10-11T23:36:02.616-04:00"
+      }
+    ],
+    "tool_calls": [
+      {
+        "agent": "boss",
+        "tool": "get_ticket_details",
+        "status": "ok",
+        "execution_id": "exec-20261011-233601-e44747",
+        "timestamp": "2026-10-11T23:36:02.328-04:00"
+      },
+      {
+        "agent": "facilities",
+        "tool": "get_lease_details",
+        "status": "ok",
+        "execution_id": "exec-20261011-233601-e44747",
+        "timestamp": "2026-10-11T23:36:02.877-04:00"
+      },
+      {
+        "agent": "boss",
+        "tool": "request_payment_approval",
+        "status": "pending_approval",
+        "execution_id": "exec-20261011-233601-e44747",
+        "timestamp": "2026-10-11T23:36:03.354-04:00"
+      }
+    ]
+  },
+  "approval": {
+    "ok": true,
+    "payment": {
+      "ok": true,
+      "payment_request_id": 1,
+      "payment_id": 1,
+      "amount": 2400.0,
+      "checking_balance_after": 1000.0,
+      "lease_id": 1,
+      "new_next_due": "2026-10-02"
+    },
+    "ticket_id": 102,
+    "ticket_status": "in_progress",
+    "continuation": {
+      "started": true,
+      "execution_id": "exec-20261011-233608-714374",
+      "ticket_id": 102,
+      "trigger": "approval of request #1",
+      "status": "running",
+      "started_at": "2026-10-11T23:36:08-04:00",
+      "finished_at": null,
+      "stop_reason": null,
+      "ticket_status": null,
+      "outcome": null
+    }
+  },
+  "continuation_run": {
+    "execution_id": "exec-20261011-233608-714374",
+    "ticket_id": 102,
+    "trigger": "approval of request #1",
+    "status": "completed",
+    "started_at": "2026-10-11T23:36:08-04:00",
+    "finished_at": "2026-10-11T23:36:21-04:00",
+    "stop_reason": null,
+    "ticket_status": "resolved",
+    "outcome": {
+      "execution_id": "exec-20261011-233608-714374",
+      "ticket_id": 102,
+      "completed": true,
+      "stop_reason": null,
+      "agent_steps": 2,
+      "mcp_tool_calls": 2,
+      "decision": {
+        "ticket_id": 102,
+        "status": "resolved",
+        "decision": "Rent payment request #1 was approved and executed for $2,400; checking balance after payment was $1,000. An updated customer reply was drafted for review (not sent), and the next rent due date is 2026-10-02.",
+        "next_steps": [],
+        "approvals_needed": [],
+        "customer_draft_id": 1,
+        "unresolved": [],
+        "safety_flags": []
+      },
+      "findings": [
+        {
+          "agent": "customer_service",
+          "objective": "prepare an updated draft reply for ticket 102 confirming rent payment was executed, using only the provided payment facts.",
+          "status": "complete",
+          "summary": "Updated draft reply confirming the rent payment was executed and stating the next rent due date. Draft saved for human review; it was not sent.",
+          "facts": [
+            "Payment of $2,400 executed, payment ID 1 (provided facts).",
+            "Next rent due 2026-10-02 (provided facts).",
+            "Draft ID 1 saved; not sent (draft_customer_message)."
+          ],
+          "recommendation": "",
+          "missing_info": [],
+          "payment_request_ids": [],
+          "safety_flags": []
+        }
+      ],
+      "unresolved": []
+    }
+  },
+  "continuation_activity": {
+    "delegations": [
+      {
+        "from": "boss",
+        "to": "customer_service",
+        "objective": "Prepare an updated draft reply for ticket 102 confirming rent payment was executed, using only the provided payment facts.",
+        "status": "started",
+        "execution_id": "exec-20261011-233608-714374",
+        "timestamp": "2026-10-11T23:36:11.951-04:00"
+      }
+    ],
+    "tool_calls": [
+      {
+        "agent": "boss",
+        "tool": "get_ticket_details",
+        "status": "ok",
+        "execution_id": "exec-20261011-233608-714374",
+        "timestamp": "2026-10-11T23:36:09.427-04:00"
+      },
+      {
+        "agent": "customer_service",
+        "tool": "draft_customer_message",
+        "status": "ok",
+        "execution_id": "exec-20261011-233608-714374",
+        "timestamp": "2026-10-11T23:36:14.290-04:00"
+      }
+    ]
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "server": "campus-customs-hw51",
+  "config": ".mcp.json",
+  "database": "data/campus_customs_new.db",
+  "tested_on": "2026-10-11",
+  "method": "Each tool was called by Claude Code through the live MCP connection (mcp__campus-customs-hw51__*), and the output was checked against direct sqlite3 queries on data/campus_customs_new.db.",
+  "connection": {
+    "status": "connected",
+    "tools_discovered": [
+      "mcp__campus-customs-hw51__check_stock_availability",
+      "mcp__campus-customs-hw51__get_lease_details",
+      "mcp__campus-customs-hw51__get_vendor_status"
+    ]
+  },
+  "original_db_unchanged": true,
+  "all_passed": true,
+  "tests": [
+    {
+      "prompt": "Ticket 101: Tauhid Zaman wants 1 Classic Bulldog Tee (SKU CC-TEE-WHITE) in size S. Use the check_stock_availability tool to see if we can fill this order from stock.",
+      "tool_name": "check_stock_availability",
+      "mcp_tool_id": "mcp__campus-customs-hw51__check_stock_availability",
+      "tool_input": {
+        "sku": "CC-TEE-WHITE",
+        "size": "S",
+        "qty_needed": 1
+      },
+      "tool_output": {
+        "found": true,
+        "sku": "CC-TEE-WHITE",
+        "name": "Classic Bulldog Tee",
+        "size": "S",
+        "location": "Aisle B",
+        "qty_on_hand": 0,
+        "qty_needed": 1,
+        "can_fulfill": false,
+        "shortfall": 1
+      },
+      "verified_against_db": "inventory WHERE sku='CC-TEE-WHITE' AND size='S' -> qty=0, location='Aisle B'",
+      "passed": true
+    },
+    {
+      "prompt": "Ticket 103 needs 12 more CC-HOOD-NAVY hoodies from Bulldog Print Co (vendor 1). Use the get_vendor_status tool to check vendor 1's lead time and whether unpaid invoices block a new order.",
+      "tool_name": "get_vendor_status",
+      "mcp_tool_id": "mcp__campus-customs-hw51__get_vendor_status",
+      "tool_input": {
+        "vendor_id": 1
+      },
+      "tool_output": {
+        "found": true,
+        "today": "2026-08-31",
+        "vendor_id": 1,
+        "name": "Bulldog Print Co",
+        "specialty": "apparel reprint",
+        "lead_days": 5,
+        "unpaid_invoices": [
+          {
+            "invoice_id": 501,
+            "amount": 840,
+            "due_date": "2026-08-28",
+            "status": "open",
+            "description": "Rush reprint CC-TEE-WHITE S",
+            "overdue": true
+          }
+        ],
+        "unpaid_total": 840,
+        "blocked_by_unpaid_invoice": true,
+        "earliest_restock_date_if_ordered_today": "2026-09-05"
+      },
+      "verified_against_db": "vendors id=1 -> Bulldog Print Co, lead_days=5; invoices vendor_id=1 -> #501 $840 due 2026-08-28 status open; desk.date_today=2026-08-31 (overdue, restock 2026-09-05)",
+      "passed": true
+    },
+    {
+      "prompt": "Ticket 102 is a rent notice from Elm City Properties for lease 1. Use the get_lease_details tool to check how much rent is due, when, and whether cash covers it.",
+      "tool_name": "get_lease_details",
+      "mcp_tool_id": "mcp__campus-customs-hw51__get_lease_details",
+      "tool_input": {
+        "lease_id": 1
+      },
+      "tool_output": {
+        "found": true,
+        "today": "2026-08-31",
+        "lease_id": 1,
+        "space_name": "Chapel Street shop",
+        "landlord": "Elm City Properties",
+        "monthly_rent": 2400,
+        "next_due": "2026-09-02",
+        "days_until_due": 2,
+        "overdue": false,
+        "notes": null,
+        "checking_balance": 3400,
+        "balance_after_rent": 1000,
+        "cash_covers_rent": true
+      },
+      "verified_against_db": "leases id=1 -> Chapel Street shop, Elm City Properties, $2400 due 2026-09-02; cash_accounts checking=3400; desk.date_today=2026-08-31 (2 days, $1000 left)",
+      "passed": true
+    }
+  ]
+}

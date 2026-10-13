@@ -1,0 +1,414 @@
+{
+  "database": "improve5.db",
+  "approver": "Test approver (isolated copy)",
+  "tickets": {
+    "102": {
+      "after": {
+        "runs": 2,
+        "agent_steps": 4,
+        "delegations": 2,
+        "delegation_pairs": [
+          [
+            "boss",
+            "facilities"
+          ],
+          [
+            "facilities",
+            "accounting"
+          ]
+        ],
+        "mcp_calls": 8,
+        "tools": [
+          "get_cash_position",
+          "get_lease_details",
+          "get_ticket_details",
+          "list_payment_requests",
+          "request_payment_approval",
+          "update_ticket_status"
+        ],
+        "repeats": 0,
+        "role_refusals": 0,
+        "errors": [],
+        "corrections": [],
+        "output_tokens": 1271,
+        "agents": [
+          "accounting",
+          "boss",
+          "facilities"
+        ]
+      },
+      "before": {
+        "runs": 2,
+        "agent_steps": 3,
+        "delegations": 1,
+        "mcp_calls": 4,
+        "repeats": 0,
+        "output_tokens": 566,
+        "agents": [
+          "boss",
+          "facilities"
+        ],
+        "payment_prepared_by": [
+          "boss"
+        ],
+        "final_status": "resolved"
+      },
+      "final_status": "resolved",
+      "boss_decision": {
+        "ticket_id": 102,
+        "status": "resolved",
+        "decision": "Rent payment request #1 was approved and executed. The payment confirmation reports $2,400 paid, with the next due date set to 2026-10-02; the ticket is resolved.",
+        "next_steps": [],
+        "approvals_needed": [],
+        "customer_draft_id": null,
+        "unresolved": [],
+        "safety_flags": [],
+        "customer_reply_needed": false
+      },
+      "payment_requests": [
+        {
+          "id": 1,
+          "kind": "rent",
+          "amount": 2400.0,
+          "prepared_by": "Accounting",
+          "status": "executed"
+        }
+      ],
+      "customer_draft": null,
+      "execution_ids": [
+        "exec-20261012-093230-750c4f",
+        "exec-20261012-093255-c7bb1a"
+      ]
+    },
+    "101": {
+      "after": {
+        "runs": 3,
+        "agent_steps": 11,
+        "delegations": 8,
+        "delegation_pairs": [
+          [
+            "boss",
+            "inventory"
+          ],
+          [
+            "inventory",
+            "accounting"
+          ],
+          [
+            "boss",
+            "accounting"
+          ],
+          [
+            "accounting",
+            "inventory"
+          ],
+          [
+            "boss",
+            "inventory"
+          ],
+          [
+            "inventory",
+            "accounting"
+          ],
+          [
+            "boss",
+            "inventory"
+          ],
+          [
+            "boss",
+            "customer_service"
+          ]
+        ],
+        "mcp_calls": 23,
+        "tools": [
+          "check_stock_availability",
+          "draft_customer_message",
+          "get_cash_position",
+          "get_invoice_details",
+          "get_pricing_and_margin",
+          "get_ticket_details",
+          "get_vendor_status",
+          "list_payment_requests",
+          "list_vendors",
+          "request_payment_approval",
+          "request_restock_order",
+          "update_ticket_status"
+        ],
+        "repeats": 2,
+        "role_refusals": 0,
+        "errors": [],
+        "corrections": [],
+        "output_tokens": 5371,
+        "agents": [
+          "accounting",
+          "boss",
+          "customer_service",
+          "inventory"
+        ]
+      },
+      "before": {
+        "runs": 3,
+        "agent_steps": 8,
+        "delegations": 5,
+        "mcp_calls": 16,
+        "repeats": 1,
+        "output_tokens": 2691,
+        "agents": [
+          "boss",
+          "inventory",
+          "accounting",
+          "customer_service"
+        ],
+        "payment_prepared_by": [
+          "boss",
+          "inventory"
+        ],
+        "final_status": "in_progress"
+      },
+      "final_status": "in_progress",
+      "boss_decision": {
+        "ticket_id": 101,
+        "status": "in_progress",
+        "decision": "Restock payment request #3 was approved and executed, but the tee has not arrived; inventory is still 0, so the order cannot yet be fulfilled. The expected arrival is 2026-09-05, and Customer Service saved draft 1 for human review; it has not been sent.",
+        "next_steps": [
+          "Recheck stock on or after 2026-09-05 and fulfill the order if the unit has arrived.",
+          "Have a person review and send customer message draft 1."
+        ],
+        "approvals_needed": [],
+        "customer_draft_id": 1,
+        "unresolved": [
+          "Restock order #1 has not arrived; no stock is available yet.",
+          "Customer update draft 1 has not been sent."
+        ],
+        "safety_flags": [],
+        "customer_reply_needed": false
+      },
+      "payment_requests": [
+        {
+          "id": 2,
+          "kind": "invoice",
+          "amount": 840.0,
+          "prepared_by": "Accounting",
+          "status": "executed"
+        },
+        {
+          "id": 3,
+          "kind": "restock",
+          "amount": 8.0,
+          "prepared_by": "Inventory",
+          "status": "executed"
+        }
+      ],
+      "customer_draft": {
+        "id": 1,
+        "body": "Hi Tauhid,\n\nThe Classic Bulldog Tee in size S is not currently in stock, so we\u2019re unable to fulfill your order just yet. A restock is on order and is expected to arrive on September 5, 2026; we\u2019ll need to wait for it to arrive before we can fulfill your order. We\u2019ll confirm once the item is available and share an update on the next step.\n\nBest regards,\nThe Campus Customs Team",
+        "words": 72,
+        "internal_terms": []
+      },
+      "execution_ids": [
+        "exec-20261012-093305-9a280f",
+        "exec-20261012-093439-292203",
+        "exec-20261012-093540-f5e923"
+      ]
+    },
+    "103": {
+      "after": {
+        "runs": 1,
+        "agent_steps": 4,
+        "delegations": 3,
+        "delegation_pairs": [
+          [
+            "boss",
+            "inventory"
+          ],
+          [
+            "boss",
+            "accounting"
+          ],
+          [
+            "boss",
+            "customer_service"
+          ]
+        ],
+        "mcp_calls": 7,
+        "tools": [
+          "check_stock_availability",
+          "draft_customer_message",
+          "get_cash_position",
+          "get_pricing_and_margin",
+          "get_ticket_details",
+          "get_vendor_status",
+          "list_vendors"
+        ],
+        "repeats": 0,
+        "role_refusals": 0,
+        "errors": [],
+        "corrections": [],
+        "output_tokens": 2366,
+        "agents": [
+          "accounting",
+          "boss",
+          "customer_service",
+          "inventory"
+        ]
+      },
+      "before": {
+        "runs": 1,
+        "agent_steps": 3,
+        "delegations": 2,
+        "mcp_calls": 3,
+        "repeats": 1,
+        "output_tokens": 728,
+        "agents": [
+          "boss",
+          "accounting",
+          "customer_service"
+        ],
+        "payment_prepared_by": [],
+        "final_status": "blocked"
+      },
+      "final_status": "blocked",
+      "boss_decision": {
+        "ticket_id": 103,
+        "status": "missing_info",
+        "decision": "A 10% discount proposal of $52.20 per hoodie is drafted for human review, with 8 size-M hoodies available now. The remaining 12 depend on a restock that is not currently affordable or confirmed, so we need the customer to accept the proposal and confirm they want to proceed before further action.",
+        "next_steps": [
+          "Have a person review/edit and send draft 2; do not treat the discount as approved.",
+          "If the customer accepts, reassess the 12-unit restock against available cash and obtain human approval before any purchase."
+        ],
+        "approvals_needed": [],
+        "customer_draft_id": 2,
+        "unresolved": [
+          "Customer acceptance and order confirmation are needed.",
+          "Restocking the 12-unit shortfall is currently unaffordable with $152 uncommitted cash versus $264 estimated cost."
+        ],
+        "safety_flags": [],
+        "customer_reply_needed": true
+      },
+      "payment_requests": [],
+      "customer_draft": {
+        "id": 2,
+        "body": "Hello Yale AI Club,\n\nWe can offer 10% off the Basic Hoodie Big Yale, bringing the price to $52.20 per hoodie. We have 8 size M hoodies available now; the remaining 12 would depend on a restock that is not yet confirmed, so we would need to confirm availability and timing before proceeding with the full quantity. Would you like to accept this proposal and proceed, understanding that the remaining 12 are subject to confirmation?\n\nBest regards,\nThe Campus Customs Team",
+        "words": 81,
+        "internal_terms": []
+      },
+      "execution_ids": [
+        "exec-20261012-093611-c06869"
+      ]
+    }
+  },
+  "mark_as_sent": {
+    "103": {
+      "first": {
+        "http": 200,
+        "ticket_status": "waiting_customer",
+        "sent_at": "2026-10-12T09:36:47-04:00"
+      },
+      "second": {
+        "http": 409,
+        "detail": "Already marked as sent by Test approver (isolated copy) at 2026-10-12T09:36:47-04:00."
+      },
+      "status_in_db": "waiting_customer"
+    },
+    "101": {
+      "first": {
+        "http": 200,
+        "ticket_status": "in_progress",
+        "sent_at": "2026-10-12T09:36:50-04:00"
+      },
+      "second": {
+        "http": 409,
+        "detail": "Already marked as sent by Test approver (isolated copy) at 2026-10-12T09:36:50-04:00."
+      },
+      "status_in_db": "in_progress"
+    }
+  },
+  "log": [
+    {
+      "ticket": 102,
+      "execution_id": "exec-20261012-093230-750c4f",
+      "status": "completed",
+      "trigger": "manual"
+    },
+    {
+      "ticket": 102,
+      "approved_request": 1,
+      "kind": "rent",
+      "amount": 2400.0,
+      "prepared_by": "Accounting",
+      "http": 200,
+      "checking_after": 1000.0
+    },
+    {
+      "ticket": 102,
+      "execution_id": "exec-20261012-093255-c7bb1a",
+      "status": "completed",
+      "trigger": "approval #1"
+    },
+    {
+      "ticket": 101,
+      "execution_id": "exec-20261012-093305-9a280f",
+      "status": "completed",
+      "trigger": "manual"
+    },
+    {
+      "ticket": 101,
+      "approved_request": 2,
+      "kind": "invoice",
+      "amount": 840.0,
+      "prepared_by": "Accounting",
+      "http": 200,
+      "checking_after": 160.0
+    },
+    {
+      "ticket": 101,
+      "execution_id": "exec-20261012-093439-292203",
+      "status": "completed",
+      "trigger": "approval #2"
+    },
+    {
+      "ticket": 101,
+      "approved_request": 3,
+      "kind": "restock",
+      "amount": 8.0,
+      "prepared_by": "Inventory",
+      "http": 200,
+      "checking_after": 152.0
+    },
+    {
+      "ticket": 101,
+      "execution_id": "exec-20261012-093540-f5e923",
+      "status": "completed",
+      "trigger": "approval #3"
+    },
+    {
+      "ticket": 103,
+      "execution_id": "exec-20261012-093611-c06869",
+      "status": "completed",
+      "trigger": "manual"
+    }
+  ],
+  "cash": {
+    "final_checking": 152.0,
+    "payments": [
+      [
+        1,
+        "rent",
+        2400.0,
+        "Test approver (isolated copy)"
+      ],
+      [
+        2,
+        "invoice",
+        840.0,
+        "Test approver (isolated copy)"
+      ],
+      [
+        3,
+        "restock",
+        8.0,
+        "Test approver (isolated copy)"
+      ]
+    ]
+  }
+}

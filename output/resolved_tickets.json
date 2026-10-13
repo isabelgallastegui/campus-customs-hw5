@@ -1,0 +1,298 @@
+{
+  "final_run": {
+    "reset_at": "2026-10-11T23:36:52.537-04:00",
+    "database": "data/campus_customs_new.db",
+    "starting_checking_balance": 3400.0,
+    "final_checking_balance": 152.0,
+    "payments_total": 3248.0,
+    "model": "gpt-6-luna",
+    "execution_ids": [
+      "exec-20261011-233834-63b757",
+      "exec-20261011-233904-374c46",
+      "exec-20261011-233925-cd3137",
+      "exec-20261011-233951-6974a5",
+      "exec-20261011-234053-1d6673",
+      "exec-20261011-234203-845cac"
+    ]
+  },
+  "tickets": [
+    {
+      "ticket_id": 101,
+      "requester": "Tauhid Zaman",
+      "final_status": "in_progress",
+      "final_status_label": "in_progress",
+      "outcome_summary": "Invoice #501 ($840) and a 1-tee restock ($8) were paid after human approval; restock order #1 arrives Sep 5, 2026. The ticket stays in progress because the customer's order is not fulfilled until the tee arrives.",
+      "agents": [
+        {
+          "agent": "boss",
+          "did": "Read the order, delegated to Inventory and Accounting in parallel, prepared invoice request #2, asked Customer Service for a draft, then after each approval continued, saved updated draft #2 and kept the ticket in progress."
+        },
+        {
+          "agent": "inventory",
+          "did": "Found 0 tees in size S; after the invoice was paid, checked vendors (unblocked, 5-day lead), asked Accounting about affordability, and prepared restock order #1 with request #3."
+        },
+        {
+          "agent": "accounting",
+          "did": "Reviewed invoice #501 ($840, overdue), confirmed no duplicate request and cash ($1,000 → $160); later priced the restock ($8) and confirmed it was affordable ($152 left)."
+        },
+        {
+          "agent": "customer_service",
+          "did": "Drafted reply #1 to Tauhid explaining size S is unavailable without promising a date."
+        }
+      ],
+      "mcp_tools_used": {
+        "get_ticket_details": [
+          "boss"
+        ],
+        "get_invoice_details": [
+          "accounting"
+        ],
+        "list_payment_requests": [
+          "accounting"
+        ],
+        "get_cash_position": [
+          "accounting"
+        ],
+        "check_stock_availability": [
+          "inventory"
+        ],
+        "request_payment_approval": [
+          "boss"
+        ],
+        "draft_customer_message": [
+          "customer_service",
+          "boss"
+        ],
+        "list_vendors": [
+          "inventory"
+        ],
+        "get_vendor_status": [
+          "inventory"
+        ],
+        "get_pricing_and_margin": [
+          "accounting"
+        ],
+        "request_restock_order": [
+          "inventory"
+        ],
+        "update_ticket_status": [
+          "boss"
+        ]
+      },
+      "human_actions": [
+        {
+          "payment_request_id": 2,
+          "kind": "invoice",
+          "ref_id": 501,
+          "amount": 840.0,
+          "prepared_by": "Boss",
+          "decision": "approved",
+          "approved_by": "Isabel",
+          "decided_at": "2026-10-11T23:39:49-04:00",
+          "executed_payment_id": 2,
+          "paid_at": "2026-08-31",
+          "checking_after": 160.0
+        },
+        {
+          "payment_request_id": 3,
+          "kind": "restock",
+          "ref_id": 1,
+          "amount": 8.0,
+          "prepared_by": "Boss",
+          "decision": "approved",
+          "approved_by": "Isabel",
+          "decided_at": "2026-10-11T23:40:51-04:00",
+          "executed_payment_id": 3,
+          "paid_at": "2026-08-31",
+          "checking_after": 152.0
+        }
+      ],
+      "rejections": [],
+      "customer_drafts": [
+        {
+          "draft_id": 1,
+          "status": "superseded",
+          "recipient": "Tauhid Zaman",
+          "sent": false
+        },
+        {
+          "draft_id": 2,
+          "status": "draft",
+          "recipient": "Tauhid Zaman",
+          "sent": false
+        }
+      ],
+      "restock_orders": [
+        {
+          "order_id": 1,
+          "status": "ordered",
+          "expected_arrival": "2026-09-05",
+          "total_cost": 8.0
+        }
+      ],
+      "blockers_or_remaining": [
+        "Restock arrives Sep 5, 2026; the order can only be fulfilled then.",
+        "Draft #2 should be reviewed and updated by a person before sending (written before approval)."
+      ],
+      "executions": [
+        {
+          "execution_id": "exec-20261011-233925-cd3137",
+          "status": "completed",
+          "boss_decision": "waiting_approval",
+          "agent_steps": 4,
+          "mcp_tool_calls": 7,
+          "stop_reason": null
+        },
+        {
+          "execution_id": "exec-20261011-233951-6974a5",
+          "status": "completed",
+          "boss_decision": "waiting_approval",
+          "agent_steps": 3,
+          "mcp_tool_calls": 7,
+          "stop_reason": null
+        },
+        {
+          "execution_id": "exec-20261011-234053-1d6673",
+          "status": "completed",
+          "boss_decision": "in_progress",
+          "agent_steps": 1,
+          "mcp_tool_calls": 2,
+          "stop_reason": null
+        }
+      ],
+      "errors": []
+    },
+    {
+      "ticket_id": 102,
+      "requester": "Elm City Properties",
+      "final_status": "resolved",
+      "final_status_label": "resolved",
+      "outcome_summary": "Rent of $2,400 for lease #1 was paid after human approval (checking $3,400 → $1,000, next due Oct 2). Nothing remains, so the ticket is resolved.",
+      "agents": [
+        {
+          "agent": "boss",
+          "did": "Read the rent notice, delegated to Facilities, prepared rent request #1 itself, and after your approval confirmed nothing remained and resolved the ticket."
+        },
+        {
+          "agent": "facilities",
+          "did": "Checked lease #1: $2,400 due Sep 2 (2 days), checking covers it with $1,000 left."
+        }
+      ],
+      "mcp_tools_used": {
+        "get_ticket_details": [
+          "boss"
+        ],
+        "get_lease_details": [
+          "facilities"
+        ],
+        "request_payment_approval": [
+          "boss"
+        ]
+      },
+      "human_actions": [
+        {
+          "payment_request_id": 1,
+          "kind": "rent",
+          "ref_id": 1,
+          "amount": 2400.0,
+          "prepared_by": "Boss",
+          "decision": "approved",
+          "approved_by": "Isabel",
+          "decided_at": "2026-10-11T23:39:02-04:00",
+          "executed_payment_id": 1,
+          "paid_at": "2026-08-31",
+          "checking_after": 1000.0
+        }
+      ],
+      "rejections": [],
+      "customer_drafts": [],
+      "restock_orders": [],
+      "blockers_or_remaining": [],
+      "executions": [
+        {
+          "execution_id": "exec-20261011-233834-63b757",
+          "status": "completed",
+          "boss_decision": "waiting_approval",
+          "agent_steps": 2,
+          "mcp_tool_calls": 3,
+          "stop_reason": null
+        },
+        {
+          "execution_id": "exec-20261011-233904-374c46",
+          "status": "completed",
+          "boss_decision": "resolved",
+          "agent_steps": 1,
+          "mcp_tool_calls": 1,
+          "stop_reason": null
+        }
+      ],
+      "errors": []
+    },
+    {
+      "ticket_id": 103,
+      "requester": "Yale AI Club",
+      "final_status": "blocked",
+      "final_status_label": "blocked (missing information)",
+      "outcome_summary": "Blocked by missing information: the Yale AI Club gave no target price, so the discount could not be evaluated. No discount, restock or delivery promise was made, and no money moved. Draft #3 asks the club for its price.",
+      "agents": [
+        {
+          "agent": "boss",
+          "did": "Read the request, delegated to Accounting and Customer Service, and decided the ticket is blocked by missing information."
+        },
+        {
+          "agent": "accounting",
+          "did": "Priced 20 hoodies ($22 cost, $58 list, $36 margin) and reported the missing target price instead of inventing a discount."
+        },
+        {
+          "agent": "customer_service",
+          "did": "Saved draft #3 asking Yale AI Club for its proposed unit price, then its final model call failed with a provider HTTP 500 (error reported to Boss)."
+        }
+      ],
+      "mcp_tools_used": {
+        "get_ticket_details": [
+          "boss"
+        ],
+        "get_pricing_and_margin": [
+          "accounting"
+        ],
+        "draft_customer_message": [
+          "customer_service"
+        ]
+      },
+      "human_actions": [],
+      "rejections": [],
+      "customer_drafts": [
+        {
+          "draft_id": 3,
+          "status": "draft",
+          "recipient": "Yale AI Club",
+          "sent": false
+        }
+      ],
+      "restock_orders": [],
+      "blockers_or_remaining": [
+        "Customer must provide a proposed discounted unit price.",
+        "Only 8 of 20 hoodies in stock; a 12-unit restock ($264) would exceed the $152 checking balance.",
+        "Agents did not check stock or vendor for this ticket in the final run.",
+        "Boss's note says no draft was created; the database shows draft #3 was saved before Customer Service's provider error."
+      ],
+      "executions": [
+        {
+          "execution_id": "exec-20261011-234203-845cac",
+          "status": "completed",
+          "boss_decision": "missing_info",
+          "agent_steps": 3,
+          "mcp_tool_calls": 3,
+          "stop_reason": null
+        }
+      ],
+      "errors": [
+        {
+          "execution_id": "exec-20261011-234203-845cac",
+          "agent": "customer_service",
+          "error": "ModelHTTPError: status_code: 500, model_name: gpt-6-luna, body: {'status': 'failure', 'message': 'Internal Server Error', 'request_id': '012fec34-06c4-4036-a1bb"
+        }
+      ]
+    }
+  ]
+}
